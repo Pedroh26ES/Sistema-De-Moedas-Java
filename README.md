@@ -288,6 +288,8 @@ cd backend
 |---------|-----------------|
 | Pedro Henrique | [@Pedroh26ES](https://github.com/Pedroh26ES) |
 | Arthus Nunes | [@ArthurNGB](https://github.com/ArthurNGB) |
+| Nayarisson Natãn | [@NatanMoroni08](https://github.com/NatanMoroni08) |
+
 
 ---
 
