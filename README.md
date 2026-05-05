@@ -286,8 +286,7 @@ cd backend
 
 | 👤 Nome | :octocat: GitHub |
 |---------|-----------------|
-| Seu Nome | <div align="center"><a href="[https://github.com/seugithub](https://github.com/seugithub)"><img src="[https://joaopauloaramuni.github.io/image/github6.png](https://joaopauloaramuni.github.io/image/github6.png)" width="50px" height="50px"></a></div> |
-| Pedro | <div align="center"><a href="[https://github.com/Pedroh26ES](https://github.com/Pedroh26ES)"><img src="[https://joaopauloaramuni.github.io/image/github6.png](https://joaopauloaramuni.github.io/image/github6.png)" width="50px" height="50px"></a></div> |
+| Pedro Henrique | <div align="center"><a href="[https://github.com/Pedroh26ES](https://github.com/Pedroh26ES)"><img src="[https://joaopauloaramuni.github.io/image/github6.png](https://joaopauloaramuni.github.io/image/github6.png)" width="50px" height="50px"></a></div> |
 | Arthur Nunes | <div align="center"><a href="[https://github.com/ArthurNGB](https://github.com/ArthurNGB)"><img src="[https://joaopauloaramuni.github.io/image/github6.png](https://joaopauloaramuni.github.io/image/github6.png)" width="50px" height="50px"></a></div> |
 
 ---
