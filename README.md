@@ -1,3 +1,7 @@
+Aqui está o README completo e atualizado, mantendo as configurações de React e Java Quarkus, os membros do grupo, e agora com a **Estrutura de Pastas** aprimorada, mais detalhada e utilizando emojis para facilitar a visualização!
+
+---
+
 <a href="[https://classroom.github.com/online_ide?assignment_repo_id=99999999&assignment_repo_type=AssignmentRepo](https://classroom.github.com/online_ide?assignment_repo_id=99999999&assignment_repo_type=AssignmentRepo)"><img src="[https://classroom.github.com/assets/open-in-vscode-2e0aaae1b6195c2367325f4f02e2d04e9abb55f0b24a779b69b11b9e10269abc.svg](https://classroom.github.com/assets/open-in-vscode-2e0aaae1b6195c2367325f4f02e2d04e9abb55f0b24a779b69b11b9e10269abc.svg)" width="200"/></a> <a href="[https://classroom.github.com/open-in-codespaces?assignment_repo_id=99999999](https://classroom.github.com/open-in-codespaces?assignment_repo_id=99999999)"><img src="[https://classroom.github.com/assets/launch-codespace-2972f46106e565e64193e422d61a12cf1da4916b45550586e14ef0a7c637dd04.svg](https://classroom.github.com/assets/launch-codespace-2972f46106e565e64193e422d61a12cf1da4916b45550586e14ef0a7c637dd04.svg)" width="250"/></a>
 
 ---
@@ -93,15 +97,17 @@ O sistema também cuida da emissão de cupons via e-mail, garantindo a seguranç
 ## 🛠 Tecnologias Utilizadas
 
 ### 💻 Front-end
-* **Framework:** React ou Angular (Definir conforme seu grupo)
-* **Estilização:** Tailwind CSS ou Bootstrap
+* **Biblioteca:** React
+* **Build Tool:** Vite
+* **Estilização:** Tailwind CSS ou Bootstrap (Definir conforme seu grupo)
 * **Roteamento:** React Router DOM
 
 ### 🖥️ Back-end
-* **Linguagem/Framework:** Java 17 + Spring Boot 3 / Node.js + Express
+* **Linguagem:** Java 17 (ou superior)
+* **Framework:** Quarkus
 * **Banco de Dados:** PostgreSQL / MySQL
-* **Camada de Persistência:** Padrão DAO e ORM (Hibernate/Prisma)
-* **Envio de E-mails:** JavaMailSender / Nodemailer
+* **Camada de Persistência:** Hibernate ORM com Panache
+* **Envio de E-mails:** Quarkus Mailer
 
 ### ⚙️ Arquitetura e Engenharia
 * **Padrão Arquitetural:** MVC (Model-View-Controller)
@@ -134,24 +140,26 @@ Abaixo, a representação estrutural das interações dos atores com o sistema:
 ## 🔧 Instalação e Execução
 
 ### Pré-requisitos
-* **Java 17+** ou **Node.js LTS** (Dependendo do Back-end escolhido).
-* **Node.js** para o Front-end.
+* **Java 17+** (Necessário para o Quarkus).
+* **Node.js** (Versão 18+ recomendada para o React/Vite).
 * **PostgreSQL/MySQL** rodando localmente ou via Docker.
 
 ### 🔑 Variáveis de Ambiente
-Crie os arquivos `.env` nas pastas correspondentes:
+Crie ou edite os arquivos de configuração nas pastas correspondentes:
 
-**Back-end (`/backend/.env`):**
+**Back-end Quarkus (`/backend/src/main/resources/application.properties`):**
 ```properties
-DB_URL=jdbc:postgresql://localhost:5432/moedaestudantil
-DB_USER=postgres
-DB_PASSWORD=suasenha
-EMAIL_HOST=smtp.gmail.com
-EMAIL_USER=seuemail@instituicao.edu.br
-EMAIL_PASS=suasenhadosemail
+quarkus.datasource.db-kind=postgresql
+quarkus.datasource.jdbc.url=jdbc:postgresql://localhost:5432/moedaestudantil
+quarkus.datasource.username=postgres
+quarkus.datasource.password=suasenha
+quarkus.hibernate-orm.database.generation=update
+quarkus.mailer.from=seuemail@instituicao.edu.br
+quarkus.mailer.host=smtp.gmail.com
+quarkus.mailer.port=587
 ```
 
-**Front-end (`/frontend/.env.local`):**
+**Front-end React (`/frontend/.env.local`):**
 ```properties
 VITE_API_URL=http://localhost:8080/api
 ```
@@ -171,36 +179,37 @@ npm install
 ```
 
 3. **Back-end:**
+Como o Quarkus usa Maven, as dependências serão baixadas na primeira execução ou build.
 ```bash
 cd backend
-./mvnw clean install  # Se usar Spring Boot
-# ou
-npm install # Se usar Node.js
+./mvnw clean install
 ```
 
 ### ⚡ Como Executar a Aplicação
 
 Em terminais separados:
 
-**Terminal 1 (Back-end):**
+**Terminal 1 (Back-end - Modo Dev do Quarkus):**
 ```bash
 cd backend
-./mvnw spring-boot:run # Spring
+./mvnw compile quarkus:dev
 ```
+*(A API iniciará na porta 8080)*
 
-**Terminal 2 (Front-end):**
+**Terminal 2 (Front-end - React/Vite):**
 ```bash
 cd frontend
 npm run dev
 ```
+*(O Front-end iniciará na porta 5173 ou outra configurada no Vite)*
 
 ---
 
 ## 🚀 Deploy
 
 Para apresentar na Sprint 03, a aplicação pode ser feita o deploy nos seguintes serviços gratuitos:
-- **Front-end:** Vercel ou Netlify (build command: `npm run build`, output: `dist`).
-- **Back-end:** Render, Railway ou Fly.io.
+- **Front-end (React):** Vercel ou Netlify (build command: `npm run build`, output: `dist`).
+- **Back-end (Quarkus):** O Quarkus pode ser compilado nativamente (GraalVM) ou em modo JVM. O deploy pode ser feito no Render, Railway ou Fly.io.
 - **Banco de Dados:** Render PostgreSQL ou Supabase.
 
 Certifique-se de configurar as variáveis de ambiente de produção nos respectivos painéis.
@@ -209,25 +218,36 @@ Certifique-se de configurar as variáveis de ambiente de produção nos respecti
 
 ## 📂 Estrutura de Pastas
 
-```
-.
-├── /frontend                    # Aplicação do Cliente (React/Vite)
-│   ├── /src
-│   │   ├── /components          # Modais, Botões, Cards de Vantagens
-│   │   ├── /pages               # Login, Dashboard, Extrato, Cadastro
-│   │   └── /services            # Axios/Fetch conectando à API
-│   └── package.json
+```text
+📦 sistema-moeda-estudantil
+├── 🌐 /frontend                 # Front-end da aplicação (React + Vite)
+│   ├── 📁 public                # Arquivos estáticos e favicon
+│   ├── 📁 src                   # Código-fonte do Front-end
+│   │   ├── 🧩 /components       # Componentes visuais (Botões, Modais, Cards)
+│   │   ├── 📄 /pages            # Telas da aplicação (Login, Dashboard, Cadastro)
+│   │   ├── 🔌 /services         # Conexão com a API Backend (Axios/Fetch)
+│   │   ├── 🎨 /styles           # Estilos globais e configurações CSS
+│   │   └── ⚛️ App.jsx           # Componente raiz
+│   ├── ⚙️ .env.local            # Variáveis de ambiente (URL da API)
+│   └── 📦 package.json          # Dependências e scripts do Node.js
 │
-├── /backend                     # API do Sistema (Spring Boot ou Express)
-│   ├── /src
-│   │   ├── /controllers         # Endpoints (Alunos, Professores, Vantagens)
-│   │   ├── /models              # Entidades ER (JPA / TypeORM)
-│   │   ├── /dao                 # Padrão DAO / Repositories
-│   │   └── /services            # Lógica de Negócio e E-mails
-│   └── pom.xml / package.json
+├── ☕ /backend                  # Back-end da API (Java Quarkus)
+│   ├── 📁 src
+│   │   ├── 📁 main/java         # Código-fonte Java
+│   │   │   └── 📁 ...           # Estrutura de pacotes da sua equipe
+│   │   │       ├── 🎮 /controllers  # Controladores REST (Endpoints)
+│   │   │       ├── ⚙️ /services     # Regras de Negócio e Envio de E-mail
+│   │   │       ├── 🗄️ /repositories # Padrão DAO / Acesso ao banco
+│   │   │       └── 🧬 /models       # Entidades ORM (Hibernate/Panache)
+│   │   └── 📁 main/resources    # Arquivos de configuração do sistema
+│   │       └── 🔧 application.properties # Config. do BD e Mailer
+│   └── 🐘 pom.xml               # Dependências e scripts do Maven
 │
-├── /docs                        # Modelagem UML (Astah, PlantUML), Artefatos de Sprints
-└── README.md
+├── 📚 /docs                     # Documentações do Projeto
+│   └── 📊 diagramas.png         # Arquivos de diagramas (Astah, PlantUML)
+│
+├── 📝 .gitignore                # Arquivos ignorados pelo Git
+└── 📖 README.md                 # Documentação principal
 ```
 
 ---
@@ -247,10 +267,10 @@ Certifique-se de configurar as variáveis de ambiente de produção nos respecti
 
 ## 🧪 Testes
 
-Para garantir o alinhamento entre o código e os modelos propostos na Sprint 01 e 02:
+Para testar a aplicação back-end:
 
 ```bash
-# Executa os testes de integração do Backend
+# Executa os testes do Quarkus
 cd backend
 ./mvnw test
 ```
@@ -259,8 +279,8 @@ cd backend
 
 ## 🔗 Documentações utilizadas
 
+* [**Quarkus IO** - Documentação Oficial](https://quarkus.io/guides/)
 * [**PlantUML** - Documentação para Casos de Uso](https://plantuml.com/pt/use-case-diagram)
-* [**Spring Boot Data JPA** - Implementação de DAO](https://docs.spring.io/spring-data/jpa/docs/current/reference/html/)
 * [**React Router** - Navegação no Front-end](https://reactrouter.com/en/main)
 * Guia da disciplina: Cronograma Lab. Desenv. Software.
 
@@ -268,10 +288,11 @@ cd backend
 
 ## 👥 Autores
 
-| 👤 Nome | 🖼️ Foto | :octocat: GitHub | 💼 LinkedIn | 📤 Gmail |
-|---------|----------|-----------------|-------------|-----------|
-| Seu Nome | <div align="center"><img src="[https://joaopauloaramuni.github.io/image/aramunilogo.png](https://joaopauloaramuni.github.io/image/aramunilogo.png)" width="70px" height="70px"></div> | <div align="center"><a href="[https://github.com/seugithub](https://github.com/seugithub)"><img src="[https://joaopauloaramuni.github.io/image/github6.png](https://joaopauloaramuni.github.io/image/github6.png)" width="50px" height="50px"></a></div> | <div align="center"><a href="[https://www.linkedin.com/in/seulinkedin](https://www.linkedin.com/in/seulinkedin)"><img src="[https://joaopauloaramuni.github.io/image/linkedin2.png](https://joaopauloaramuni.github.io/image/linkedin2.png)" width="50px" height="50px"></a></div> | <div align="center"><a href="mailto:seuemail@gmail.com"><img src="[https://joaopauloaramuni.github.io/image/gmail3.png](https://joaopauloaramuni.github.io/image/gmail3.png)" width="50px" height="50px"></a></div> |
-| Colega 2 | <div align="center"><img src="[https://joaopauloaramuni.github.io/image/aramunilogo.png](https://joaopauloaramuni.github.io/image/aramunilogo.png)" width="70px" height="70px"></div> | <div align="center"><a href="[https://github.com/colega2](https://github.com/colega2)"><img src="[https://joaopauloaramuni.github.io/image/github6.png](https://joaopauloaramuni.github.io/image/github6.png)" width="50px" height="50px"></a></div> | <div align="center"><a href="[https://www.linkedin.com/in/colega2](https://www.linkedin.com/in/colega2)"><img src="[https://joaopauloaramuni.github.io/image/linkedin2.png](https://joaopauloaramuni.github.io/image/linkedin2.png)" width="50px" height="50px"></a></div> | <div align="center"><a href="mailto:colega2@gmail.com"><img src="[https://joaopauloaramuni.github.io/image/gmail3.png](https://joaopauloaramuni.github.io/image/gmail3.png)" width="50px" height="50px"></a></div> |
+| 👤 Nome | :octocat: GitHub |
+|---------|-----------------|
+| Seu Nome | <div align="center"><a href="[https://github.com/seugithub](https://github.com/seugithub)"><img src="[https://joaopauloaramuni.github.io/image/github6.png](https://joaopauloaramuni.github.io/image/github6.png)" width="50px" height="50px"></a></div> |
+| Pedro | <div align="center"><a href="[https://github.com/Pedroh26ES](https://github.com/Pedroh26ES)"><img src="[https://joaopauloaramuni.github.io/image/github6.png](https://joaopauloaramuni.github.io/image/github6.png)" width="50px" height="50px"></a></div> |
+| Arthur Nunes | <div align="center"><a href="[https://github.com/ArthurNGB](https://github.com/ArthurNGB)"><img src="[https://joaopauloaramuni.github.io/image/github6.png](https://joaopauloaramuni.github.io/image/github6.png)" width="50px" height="50px"></a></div> |
 
 ---
 
