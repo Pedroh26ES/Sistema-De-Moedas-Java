@@ -164,7 +164,7 @@ VITE_API_URL=http://localhost:8080/api
 
 1. **Clone o Repositório:**
 ```bash
-git clone https://github.com/seu-usuario/sistema-moeda-estudantil.git
+git clone https://github.com/Pedroh26ES/sistema-moeda-estudantil.git
 cd sistema-moeda-estudantil
 ```
 
