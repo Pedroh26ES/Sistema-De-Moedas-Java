@@ -287,7 +287,7 @@ cd backend
 | 👤 Nome | :octocat: GitHub |
 |---------|-----------------|
 | Pedro Henrique | [@Pedroh26ES](https://github.com/Pedroh26ES) |
-| Arthus Nunes | [@ArthurNGB](https://github.com/AthurNGB) |
+| Arthus Nunes | [@ArthurNGB](https://github.com/ArthurNGB) |
 
 ---
 
