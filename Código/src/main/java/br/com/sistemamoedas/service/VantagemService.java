@@ -37,6 +37,9 @@ public class VantagemService {
     @Inject
     EmailGateway emails;
 
+    @Inject
+    RabbitMqFilaService filaEventos;
+
     public List<Vantagem> catalogo() {
         return vantagens.ativas();
     }
@@ -125,6 +128,8 @@ public class VantagemService {
         String conteudoEmpresa = "O aluno " + aluno.nome + " resgatou " + vantagem.titulo + ". Codigo: " + codigo;
         emails.enviar(aluno.email, "Cupom de troca gerado", conteudoAluno, codigo);
         emails.enviar(vantagem.empresa.email, "Nova troca para validar", conteudoEmpresa, codigo);
+        filaEventos.publicar(new EventoSistema("CUPOM_GERADO", transacao.id, codigo, aluno.email, null,
+                vantagem.empresa.email, vantagem.titulo, vantagem.custoMoedas, transacao.criadaEm.toString()));
         return codigo;
     }
 
@@ -147,6 +152,9 @@ public class VantagemService {
         transacao.validadoEm = LocalDateTime.now();
         emails.enviar(transacao.aluno.email, "Cupom validado",
                 "Seu cupom " + transacao.codigoCupom + " foi validado por " + empresa.nome + ".", transacao.codigoCupom);
+        filaEventos.publicar(new EventoSistema("CUPOM_VALIDADO", transacao.id, transacao.codigoCupom,
+                transacao.aluno.email, null, empresa.email, transacao.vantagem.titulo, transacao.valor,
+                transacao.validadoEm.toString()));
         return transacao;
     }
 
@@ -197,11 +205,17 @@ public class VantagemService {
                         "O cupom " + transacao.codigoCupom + " da vantagem " + vantagem.titulo
                                 + " voltou a ficar disponivel para validacao no parceiro.",
                         transacao.codigoCupom);
+                filaEventos.publicar(new EventoSistema("CUPOM_REATIVADO", transacao.id, transacao.codigoCupom,
+                        transacao.aluno.email, null, vantagem.empresa.email, vantagem.titulo, transacao.valor,
+                        LocalDateTime.now().toString()));
             } else {
                 emails.enviar(transacao.aluno.email, "Cupom temporariamente desativado",
                         "O cupom " + transacao.codigoCupom + " da vantagem " + vantagem.titulo
                                 + " foi desativado enquanto o parceiro pausa a vantagem. Aguarde a republicacao antes de tentar utilizar.",
                         transacao.codigoCupom);
+                filaEventos.publicar(new EventoSistema("CUPOM_DESATIVADO", transacao.id, transacao.codigoCupom,
+                        transacao.aluno.email, null, vantagem.empresa.email, vantagem.titulo, transacao.valor,
+                        LocalDateTime.now().toString()));
             }
         }
     }

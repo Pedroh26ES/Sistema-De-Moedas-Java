@@ -17,17 +17,20 @@ import {
   HandCoins,
   House,
   LayoutDashboard,
+  LoaderCircle,
   LogOut,
   MailCheck,
+  MapPin,
   Power,
+  QrCode,
   ReceiptText,
+  X,
   ShieldCheck,
   Sparkles,
   Store,
   Search,
   Send,
   TicketCheck,
-  Trophy,
   UserRound,
   UsersRound,
   WalletCards
@@ -431,12 +434,14 @@ function Login({ onLogin, notify }) {
 
 function CadastroAluno({ notify }) {
   const [instituicoes, setInstituicoes] = useState([]);
+  const [cepLoading, setCepLoading] = useState(false);
   const [form, setForm] = useState({
     nome: "",
     email: "",
     senha: "",
     cpf: "",
     rg: "",
+    cep: "",
     endereco: "",
     instituicaoId: "",
     curso: ""
@@ -469,11 +474,34 @@ function CadastroAluno({ notify }) {
   const submit = async (event) => {
     event.preventDefault();
     try {
-      await api("/api/alunos", { method: "POST", body: JSON.stringify({ ...form, instituicaoId: Number(form.instituicaoId) }) });
+      const { cep, ...payload } = form;
+      await api("/api/alunos", { method: "POST", body: JSON.stringify({ ...payload, instituicaoId: Number(form.instituicaoId) }) });
       notify("success", "Aluno cadastrado com sucesso.");
       navigateTo("/login");
     } catch (error) {
       notify("error", error.message);
+    }
+  };
+
+  const consultarCep = async () => {
+    const cep = form.cep.replace(/\D/g, "");
+    if (cep.length !== 8) {
+      notify("error", "Informe um CEP com 8 digitos para buscar o endereco.");
+      return;
+    }
+    setCepLoading(true);
+    try {
+      const endereco = await api(`/api/cep/${cep}`);
+      setForm((current) => ({
+        ...current,
+        cep: endereco.cep,
+        endereco: endereco.enderecoFormatado || current.endereco
+      }));
+      notify("success", "Endereco preenchido pelo ViaCEP.");
+    } catch (error) {
+      notify("error", error.message);
+    } finally {
+      setCepLoading(false);
     }
   };
 
@@ -485,6 +513,20 @@ function CadastroAluno({ notify }) {
         <Field label="Senha" type="password" value={form.senha} onChange={(senha) => setForm({ ...form, senha })} />
         <Field label="CPF" value={form.cpf} onChange={(cpf) => setForm({ ...form, cpf })} />
         <Field label="RG" value={form.rg} onChange={(rg) => setForm({ ...form, rg })} />
+        <label>CEP
+          <div className="input-action-row">
+            <input
+              value={form.cep}
+              onBlur={() => form.cep.replace(/\D/g, "").length === 8 && consultarCep()}
+              onChange={(e) => setForm({ ...form, cep: e.target.value })}
+              placeholder="Ex.: 30140071"
+            />
+            <button className="ghost-button small" type="button" onClick={consultarCep} disabled={cepLoading}>
+              {cepLoading ? <LoaderCircle size={16} className="spin-icon" /> : <MapPin size={16} />}
+              Buscar
+            </button>
+          </div>
+        </label>
         <label className="wide">Endereco
           <input value={form.endereco} onChange={(e) => setForm({ ...form, endereco: e.target.value })} required />
         </label>
@@ -509,16 +551,40 @@ function CadastroAluno({ notify }) {
 }
 
 function CadastroEmpresa({ notify }) {
-  const [form, setForm] = useState({ nome: "", email: "", senha: "", cnpj: "", endereco: "", contato: "" });
+  const [form, setForm] = useState({ nome: "", email: "", senha: "", cnpj: "", cep: "", endereco: "", contato: "" });
+  const [cepLoading, setCepLoading] = useState(false);
 
   const submit = async (event) => {
     event.preventDefault();
     try {
-      await api("/api/empresas", { method: "POST", body: JSON.stringify(form) });
+      const { cep, ...payload } = form;
+      await api("/api/empresas", { method: "POST", body: JSON.stringify(payload) });
       notify("success", "Empresa cadastrada com sucesso.");
       navigateTo("/login");
     } catch (error) {
       notify("error", error.message);
+    }
+  };
+
+  const consultarCep = async () => {
+    const cep = form.cep.replace(/\D/g, "");
+    if (cep.length !== 8) {
+      notify("error", "Informe um CEP com 8 digitos para buscar o endereco.");
+      return;
+    }
+    setCepLoading(true);
+    try {
+      const endereco = await api(`/api/cep/${cep}`);
+      setForm((current) => ({
+        ...current,
+        cep: endereco.cep,
+        endereco: endereco.enderecoFormatado || current.endereco
+      }));
+      notify("success", "Endereco preenchido pelo ViaCEP.");
+    } catch (error) {
+      notify("error", error.message);
+    } finally {
+      setCepLoading(false);
     }
   };
 
@@ -530,6 +596,20 @@ function CadastroEmpresa({ notify }) {
         <Field label="Senha" type="password" value={form.senha} onChange={(senha) => setForm({ ...form, senha })} />
         <Field label="CNPJ" value={form.cnpj} onChange={(cnpj) => setForm({ ...form, cnpj })} />
         <Field label="Contato" value={form.contato} onChange={(contato) => setForm({ ...form, contato })} />
+        <label>CEP
+          <div className="input-action-row">
+            <input
+              value={form.cep}
+              onBlur={() => form.cep.replace(/\D/g, "").length === 8 && consultarCep()}
+              onChange={(e) => setForm({ ...form, cep: e.target.value })}
+              placeholder="Ex.: 30140071"
+            />
+            <button className="ghost-button small" type="button" onClick={consultarCep} disabled={cepLoading}>
+              {cepLoading ? <LoaderCircle size={16} className="spin-icon" /> : <MapPin size={16} />}
+              Buscar
+            </button>
+          </div>
+        </label>
         <label className="wide">Endereco
           <input value={form.endereco} onChange={(e) => setForm({ ...form, endereco: e.target.value })} required />
         </label>
@@ -569,6 +649,7 @@ function AlunoDashboard({ session, logout, notify }) {
   const [catalogQuery, setCatalogQuery] = useState("");
   const [catalogFilter, setCatalogFilter] = useState("todos");
   const [lastCoupon, setLastCoupon] = useState(null);
+  const [expandedQr, setExpandedQr] = useState(null);
 
   const saldo = data?.aluno?.saldoMoedas || 0;
   const vantagens = data?.vantagens || [];
@@ -580,19 +661,10 @@ function AlunoDashboard({ session, logout, notify }) {
     .filter((row) => row.tipo === "RESGATE_VANTAGEM")
     .reduce((total, row) => total + row.valor, 0);
   const cuponsValidados = extrato.filter((row) => row.codigoCupom && row.cupomValidado).length;
-  const journeyLevels = [
-    { min: 0, title: "Em evolucao" },
-    { min: 200, title: "Protagonista" },
-    { min: 500, title: "Embaixador" }
-  ];
-  const currentJourney = [...journeyLevels].reverse().find((level) => moedasRecebidas >= level.min) || journeyLevels[0];
-  const nextJourney = journeyLevels.find((level) => moedasRecebidas < level.min);
-  const journeyMissing = Math.max((nextJourney?.min || 0) - moedasRecebidas, 0);
-  const nivelAluno = currentJourney.title;
   const bonusLevels = [
-    { spent: 100, title: "Nivel Essencial", benefit: "Voucher de impressao", reward: "brinde extra de 60 paginas P&B." },
-    { spent: 250, title: "Nivel Plus", benefit: "Combo cafe e estudo", reward: "retirada extra do combo no parceiro." },
-    { spent: 500, title: "Nivel Elite", benefit: "Credito na livraria", reward: "credito extra de R$ 30 em material de apoio." }
+    { spent: 100, title: "Essencial", benefit: "Voucher de impressao", reward: "+60 paginas P&B" },
+    { spent: 250, title: "Plus", benefit: "Combo cafe e estudo", reward: "1 retirada extra" },
+    { spent: 500, title: "Elite", benefit: "Credito na livraria", reward: "+R$ 30 em material" }
   ];
   const unlockedBonus = [...bonusLevels].reverse().find((bonus) => moedasUsadas >= bonus.spent);
   const nextBonus = bonusLevels.find((bonus) => moedasUsadas < bonus.spent);
@@ -600,11 +672,6 @@ function AlunoDashboard({ session, logout, notify }) {
   const bonusProgress = bonusTarget ? Math.min(100, Math.round((moedasUsadas / bonusTarget.spent) * 100)) : 100;
   const missingForBonus = Math.max((bonusTarget?.spent || 0) - moedasUsadas, 0);
   const bonusTitle = unlockedBonus ? `${unlockedBonus.title} liberado` : `${bonusTarget.title} em andamento`;
-  const impactoAluno = [
-    ["Reconhecimento", `${money.format(moedasRecebidas)} moedas recebidas por merito`],
-    ["Uso dos beneficios", `${money.format(moedasUsadas)} moedas gastas em resgates`],
-    ["Cupons confirmados", `${cuponsValidados} beneficios validados por parceiros`]
-  ];
   const filteredVantagens = useMemo(() => {
     const query = catalogQuery.trim().toLowerCase();
     return vantagens.filter((vantagem) => {
@@ -619,12 +686,18 @@ function AlunoDashboard({ session, logout, notify }) {
       return matchesQuery && matchesFilter;
     });
   }, [catalogFilter, catalogQuery, saldo, vantagens]);
+  const extratoCupomRecente = extrato.find((row) => row.codigoCupom);
+  const recentCoupon = lastCoupon || (extratoCupomRecente ? {
+    codigo: extratoCupomRecente.codigoCupom,
+    qrCodeUrl: extratoCupomRecente.qrCodeUrl,
+    vantagem: extratoCupomRecente.vantagem || "Cupom resgatado"
+  } : null);
 
   const resgatar = async (vantagemId) => {
     try {
       const vantagem = vantagens.find((item) => item.id === vantagemId);
       const cupom = await api("/api/aluno/resgates", { method: "POST", body: JSON.stringify({ vantagemId }) });
-      setLastCoupon({ codigo: cupom.codigo, vantagem: vantagem?.titulo || "Vantagem resgatada" });
+      setLastCoupon({ codigo: cupom.codigo, qrCodeUrl: cupom.qrCodeUrl, vantagem: vantagem?.titulo || "Vantagem resgatada" });
       notify("success", `${cupom.mensagem} Codigo: ${cupom.codigo}`);
       reload();
     } catch (error) {
@@ -633,9 +706,9 @@ function AlunoDashboard({ session, logout, notify }) {
   };
 
   const copiarCupom = async () => {
-    if (!lastCoupon) return;
+    if (!recentCoupon) return;
     try {
-      await navigator.clipboard.writeText(lastCoupon.codigo);
+      await navigator.clipboard.writeText(recentCoupon.codigo);
       notify("success", "Cupom copiado.");
     } catch {
       notify("error", "Nao foi possivel copiar o cupom automaticamente.");
@@ -655,21 +728,27 @@ function AlunoDashboard({ session, logout, notify }) {
 
       <div className="dashboard-insight-grid">
         <section className="surface-card bonus-card">
-          <div className="bonus-card-icon"><Gift size={24} /></div>
-          <SectionTitle eyebrow="Recompensa por resgates" title={bonusTitle} />
-          <p className="compact-note">
+          <div className="bonus-head">
+            <div className="bonus-card-icon"><Gift size={23} /></div>
+            <SectionTitle eyebrow="Recompensa por resgates" title={bonusTitle} />
+          </div>
+          <p className="compact-note bonus-current">
             {unlockedBonus
-              ? `Ganho atual: ${unlockedBonus.benefit} como ${unlockedBonus.reward}`
-              : `Primeiro ganho: ${bonusTarget.benefit} como ${bonusTarget.reward}`}
+              ? <><strong>Liberado:</strong> {unlockedBonus.benefit} ({unlockedBonus.reward})</>
+              : <><strong>Primeira meta:</strong> {bonusTarget.benefit} ({bonusTarget.reward})</>}
           </p>
           <div className="bonus-summary">
             <span>
               <strong>{money.format(moedasUsadas)}</strong>
-              usadas em resgates
+              usadas
             </span>
             <span>
               <strong>{nextBonus ? money.format(missingForBonus) : "0"}</strong>
               {nextBonus ? `faltam para ${nextBonus.title}` : "metas completas"}
+            </span>
+            <span>
+              <strong>{bonusTarget.title}</strong>
+              meta atual
             </span>
           </div>
           <div className="progress-track" aria-label="Progresso da meta">
@@ -686,11 +765,10 @@ function AlunoDashboard({ session, logout, notify }) {
                   <span>{status}</span>
                   <div>
                     <strong>{bonus.title}</strong>
-                    <small>{money.format(bonus.spent)} moedas usadas</small>
+                    <small>{money.format(bonus.spent)} moedas</small>
                   </div>
                   <p>
-                    <b>{bonus.benefit}</b>
-                    {bonus.reward}
+                    <b>{bonus.benefit}</b> {bonus.reward}
                   </p>
                 </article>
               );
@@ -699,45 +777,27 @@ function AlunoDashboard({ session, logout, notify }) {
         </section>
 
         <section className="surface-card coupon-card">
-          <SectionTitle eyebrow="Cupom recente" title={lastCoupon ? lastCoupon.codigo : "Nenhum cupom novo"} />
-          <p>{lastCoupon ? lastCoupon.vantagem : "Quando voce resgatar uma vantagem, o codigo fica em destaque aqui."}</p>
-          <button className="outline-button" onClick={copiarCupom} disabled={!lastCoupon}>
+          <SectionTitle eyebrow="Cupom recente" title={recentCoupon ? recentCoupon.codigo : "Sem cupom ativo"} />
+          <p>{recentCoupon ? recentCoupon.vantagem : "Resgate uma vantagem para receber codigo e QR Code."}</p>
+          {recentCoupon?.qrCodeUrl && (
+            <div className="coupon-qr-card">
+              <button
+                type="button"
+                className="qr-image-button"
+                onClick={() => setExpandedQr(recentCoupon)}
+                aria-label={`Ampliar QR Code do cupom ${recentCoupon.codigo}`}
+              >
+                <img src={recentCoupon.qrCodeUrl} alt={`QR Code do cupom ${recentCoupon.codigo}`} />
+              </button>
+              <span>Apresente no parceiro para validar a retirada.</span>
+            </div>
+          )}
+          <button className="outline-button" onClick={copiarCupom} disabled={!recentCoupon}>
             <Copy size={17} />
             Copiar cupom
           </button>
         </section>
       </div>
-
-      <section className="surface-card journey-card">
-        <div className="journey-profile">
-          <span><Trophy size={26} /></span>
-          <div>
-            <span className="eyebrow">Jornada do aluno</span>
-            <h2>{nivelAluno}</h2>
-            <p className="compact-note">
-              {nextJourney
-                ? `${money.format(moedasRecebidas)} moedas recebidas por reconhecimento dos professores. Proximo nivel: ${nextJourney.title}.`
-                : `${money.format(moedasRecebidas)} moedas recebidas por reconhecimento dos professores. Maior nivel do semestre.`}
-            </p>
-            <div className="journey-level-list">
-              {journeyLevels.map((level) => (
-                <span className={moedasRecebidas >= level.min ? "active" : ""} key={level.title}>
-                  <strong>{level.title}</strong>
-                  <small>{level.min === 0 ? "Inicio" : `${money.format(level.min)} moedas recebidas`}</small>
-                </span>
-              ))}
-            </div>
-          </div>
-        </div>
-        <div className="journey-facts">
-          {impactoAluno.map(([label, value]) => (
-            <span key={label}>
-              <strong>{label}</strong>
-              {value}
-            </span>
-          ))}
-        </div>
-      </section>
 
       <div className="section-title-row">
         <SectionTitle eyebrow="Catalogo" title="Vantagens disponiveis" />
@@ -774,15 +834,35 @@ function AlunoDashboard({ session, logout, notify }) {
               <h3>{vantagem.titulo}</h3>
               <BenefitDescription description={vantagem.descricao} />
               {acquired && (
-                <div className={vantagem.cupomValidado ? "owned-benefit validated" : couponPaused ? "owned-benefit deactivated" : "owned-benefit pending"}>
-                  <TicketCheck size={17} />
-                  <span>
-                    {vantagem.codigoCupom} - {vantagem.cupomValidado
-                      ? "validado e pronto para uso"
-                      : couponPaused
-                        ? "temporariamente desativado. O parceiro pausou esta vantagem; aguarde a republicacao para usar o cupom."
-                      : "pendente de validacao. Aguarde a confirmacao do parceiro para usar o cupom."}
-                  </span>
+                <div className={vantagem.cupomValidado ? "coupon-pass validated" : couponPaused ? "coupon-pass deactivated" : "coupon-pass pending"}>
+                  <div className="coupon-pass-info">
+                    <span><TicketCheck size={16} /> Cupom</span>
+                    <strong>{vantagem.codigoCupom}</strong>
+                    <small>
+                      {vantagem.cupomValidado
+                        ? "Validado pelo parceiro"
+                        : couponPaused
+                          ? "Pausado pelo parceiro"
+                          : "Aguardando validacao"}
+                    </small>
+                  </div>
+                  {vantagem.qrCodeUrl && (
+                    <div className="coupon-pass-qr">
+                      <button
+                        type="button"
+                        className="qr-image-button small"
+                        onClick={() => setExpandedQr({
+                          codigo: vantagem.codigoCupom,
+                          qrCodeUrl: vantagem.qrCodeUrl,
+                          vantagem: vantagem.titulo
+                        })}
+                        aria-label={`Ampliar QR Code do cupom ${vantagem.codigoCupom}`}
+                      >
+                        <img src={vantagem.qrCodeUrl} alt={`QR Code do cupom ${vantagem.codigoCupom}`} />
+                      </button>
+                      <span><QrCode size={13} /> QR</span>
+                    </div>
+                  )}
                 </div>
               )}
               <div className="card-footer">
@@ -798,7 +878,25 @@ function AlunoDashboard({ session, logout, notify }) {
 
       <TransactionsTable title="Extrato do aluno" rows={data.extrato} />
       <NotificationsPanel items={data.notificacoes || []} />
+      {expandedQr && <QrCodeModal cupom={expandedQr} onClose={() => setExpandedQr(null)} />}
     </DashboardShell>
+  );
+}
+
+function QrCodeModal({ cupom, onClose }) {
+  return (
+    <div className="qr-modal-backdrop" role="presentation" onClick={onClose}>
+      <section className="qr-modal" role="dialog" aria-modal="true" aria-label={`QR Code do cupom ${cupom.codigo}`} onClick={(event) => event.stopPropagation()}>
+        <button className="qr-modal-close" type="button" onClick={onClose} aria-label="Fechar QR Code">
+          <X size={18} />
+        </button>
+        <span className="eyebrow">Cupom para validacao</span>
+        <h2>{cupom.codigo}</h2>
+        <p>{cupom.vantagem}</p>
+        <img src={cupom.qrCodeUrl} alt={`QR Code ampliado do cupom ${cupom.codigo}`} />
+        <small>Mostre este QR Code ao parceiro para localizar e validar o cupom no atendimento.</small>
+      </section>
+    </div>
   );
 }
 
@@ -985,7 +1083,7 @@ function EmpresaDashboard({ session, logout, notify }) {
   const [form, setForm] = useState(emptyVantagem());
   const [catalogQuery, setCatalogQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("todas");
-  const [couponCode, setCouponCode] = useState("");
+  const [couponCode, setCouponCode] = useState(() => new URLSearchParams(window.location.search).get("cupom") || "");
   const [couponResult, setCouponResult] = useState(null);
   const [statusChangingId, setStatusChangingId] = useState(null);
   const [deletingId, setDeletingId] = useState(null);

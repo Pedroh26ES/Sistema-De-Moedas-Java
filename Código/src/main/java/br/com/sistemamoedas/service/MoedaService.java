@@ -29,6 +29,9 @@ public class MoedaService {
     @Inject
     EmailGateway emails;
 
+    @Inject
+    RabbitMqFilaService filaEventos;
+
     @Transactional
     public void creditarCotaSemestral(Long professorId) {
         Professor professor = buscarProfessor(professorId);
@@ -75,6 +78,8 @@ public class MoedaService {
 
         emails.enviar(aluno.email, "Voce recebeu moedas estudantis",
                 "O professor " + professor.nome + " enviou " + valor + " moedas. Motivo: " + mensagem.trim(), null);
+        filaEventos.publicar(new EventoSistema("MOEDAS_ENVIADAS", transacao.id, null, aluno.email, professor.email,
+                null, null, valor, transacao.criadaEm.toString()));
     }
 
     public List<Transacao> extratoProfessor(Long professorId) {

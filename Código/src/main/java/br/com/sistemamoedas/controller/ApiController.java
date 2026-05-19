@@ -16,9 +16,12 @@ import br.com.sistemamoedas.security.SessaoService;
 import br.com.sistemamoedas.security.SessaoUsuario;
 import br.com.sistemamoedas.service.AlunoService;
 import br.com.sistemamoedas.service.CadastroService;
+import br.com.sistemamoedas.service.EnderecoViaCep;
 import br.com.sistemamoedas.service.MoedaService;
+import br.com.sistemamoedas.service.QrCodeService;
 import br.com.sistemamoedas.service.RegraNegocioException;
 import br.com.sistemamoedas.service.VantagemService;
+import br.com.sistemamoedas.service.ViaCepService;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.CookieParam;
@@ -29,9 +32,11 @@ import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -68,6 +73,12 @@ public class ApiController {
     @Inject
     EmailNotificacaoRepository notificacoes;
 
+    @Inject
+    QrCodeService qrCodes;
+
+    @Inject
+    ViaCepService viaCep;
+
     @GET
     @Path("me")
     public Response me(@CookieParam(SessaoService.COOKIE) String token) {
@@ -100,6 +111,12 @@ public class ApiController {
     @Path("instituicoes")
     public List<InstituicaoDto> instituicoes() {
         return cadastros.instituicoesDisponiveis().stream().map(this::toInstituicao).toList();
+    }
+
+    @GET
+    @Path("cep/{cep}")
+    public EnderecoViaCep consultarCep(@PathParam("cep") String cep) {
+        return viaCep.consultar(cep);
     }
 
     @POST
@@ -143,7 +160,41 @@ public class ApiController {
     public CupomDto resgatar(@CookieParam(SessaoService.COOKIE) String token, ResgateRequest request) {
         SessaoUsuario sessao = sessoes.exigir(token, Perfil.ALUNO);
         String codigo = vantagemService.resgatar(sessao.usuarioId(), request.vantagemId());
-        return new CupomDto(codigo, "Resgate realizado. Cupom enviado para aluno e empresa parceira.");
+        return new CupomDto(codigo, qrCodeUrl(codigo),
+                "Resgate realizado. Cupom enviado para aluno e empresa parceira.");
+    }
+
+    @GET
+    @Path("cupons/{codigo}/qrcode")
+    @Produces("image/png")
+    public Response qrCodeCupom(@CookieParam(SessaoService.COOKIE) String token, @PathParam("codigo") String codigo,
+            @Context UriInfo uriInfo) {
+        SessaoUsuario sessao = sessoes.porToken(token)
+                .orElseThrow(() -> new RegraNegocioException("Faca login para acessar o QR Code do cupom."));
+        Transacao transacao = transacoes.cupomPorCodigo(codigo.trim().toUpperCase())
+                .orElseThrow(() -> new RegraNegocioException("Cupom nao encontrado."));
+        boolean permitido = switch (sessao.perfil()) {
+            case ALUNO -> transacao.aluno != null && transacao.aluno.id.equals(sessao.usuarioId());
+            case EMPRESA -> transacao.empresa != null && transacao.empresa.id.equals(sessao.usuarioId());
+            case PROFESSOR -> false;
+        };
+        if (!permitido) {
+            throw new RegraNegocioException("Seu perfil nao possui acesso a este QR Code.");
+        }
+
+        String validacaoUrl = uriInfo.getBaseUriBuilder()
+                .replacePath("empresa")
+                .queryParam("cupom", transacao.codigoCupom)
+                .build()
+                .toString();
+        String conteudo = "Valoriza Ae\nCupom: " + transacao.codigoCupom
+                + "\nAluno: " + transacao.aluno.nome
+                + "\nVantagem: " + transacao.vantagem.titulo
+                + "\nValidar em: " + validacaoUrl;
+        return Response.ok(qrCodes.gerarPng(conteudo))
+                .type("image/png")
+                .header(HttpHeaders.CACHE_CONTROL, "no-store")
+                .build();
     }
 
     @GET
@@ -272,14 +323,14 @@ public class ApiController {
     private VantagemDto toVantagem(Vantagem vantagem) {
         return new VantagemDto(vantagem.id, vantagem.titulo, vantagem.descricao, vantagem.fotoUrl,
                 vantagem.custoMoedas, vantagem.ativa, vantagem.empresa.nome, false, null, false, null,
-                !transacoes.existeParaVantagem(vantagem));
+                null, !transacoes.existeParaVantagem(vantagem));
     }
 
     private VantagemDto toVantagemAluno(Aluno aluno, Vantagem vantagem) {
         return transacoes.resgateAlunoVantagem(aluno, vantagem)
                 .map(resgate -> new VantagemDto(vantagem.id, vantagem.titulo, vantagem.descricao, vantagem.fotoUrl,
                         vantagem.custoMoedas, vantagem.ativa, vantagem.empresa.nome, true, resgate.codigoCupom,
-                        resgate.cupomValidado, resgate.criadaEm.toString(), false))
+                        resgate.cupomValidado, resgate.criadaEm.toString(), qrCodeUrl(resgate.codigoCupom), false))
                 .orElseGet(() -> toVantagem(vantagem));
     }
 
@@ -301,12 +352,16 @@ public class ApiController {
                 transacao.mensagem, transacao.codigoCupom, contraparte,
                 transacao.vantagem != null ? transacao.vantagem.titulo : null, transacao.cupomValidado,
                 transacao.validadoEm != null ? transacao.validadoEm.toString() : null,
-                transacao.vantagem == null || transacao.vantagem.ativa);
+                transacao.vantagem == null || transacao.vantagem.ativa, qrCodeUrl(transacao.codigoCupom));
     }
 
     private NotificacaoDto toNotificacao(EmailNotificacao notificacao) {
         return new NotificacaoDto(notificacao.id, notificacao.destinatario, notificacao.assunto,
                 notificacao.conteudo, notificacao.codigoReferencia, notificacao.criadoEm.toString());
+    }
+
+    private String qrCodeUrl(String codigoCupom) {
+        return codigoCupom == null || codigoCupom.isBlank() ? null : "/api/cupons/" + codigoCupom + "/qrcode";
     }
 
     public record ErrorDto(String mensagem) {
@@ -363,11 +418,12 @@ public class ApiController {
 
     public record VantagemDto(Long id, String titulo, String descricao, String fotoUrl, int custoMoedas, boolean ativa,
             String empresaNome, boolean adquirida, String codigoCupom, boolean cupomValidado, String resgatadaEm,
-            boolean excluivel) {
+            String qrCodeUrl, boolean excluivel) {
     }
 
     public record TransacaoDto(Long id, String tipo, int valor, String criadaEm, String mensagem, String codigoCupom,
-            String contraparte, String vantagem, boolean cupomValidado, String validadoEm, boolean vantagemAtiva) {
+            String contraparte, String vantagem, boolean cupomValidado, String validadoEm, boolean vantagemAtiva,
+            String qrCodeUrl) {
     }
 
     public record AlunoDashboardDto(AlunoDto aluno, List<TransacaoDto> extrato, List<VantagemDto> vantagens,
@@ -384,7 +440,7 @@ public class ApiController {
             List<NotificacaoDto> notificacoes, String resumo) {
     }
 
-    public record CupomDto(String codigo, String mensagem) {
+    public record CupomDto(String codigo, String qrCodeUrl, String mensagem) {
     }
 
     public record NotificacaoDto(Long id, String destinatario, String assunto, String conteudo, String codigoReferencia,

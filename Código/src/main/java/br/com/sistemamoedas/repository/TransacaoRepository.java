@@ -30,6 +30,10 @@ public class TransacaoRepository implements PanacheRepository<Transacao> {
         return find("empresa = ?1 and upper(codigoCupom) = ?2", empresa, codigo.toUpperCase()).firstResultOptional();
     }
 
+    public Optional<Transacao> cupomPorCodigo(String codigo) {
+        return find("upper(codigoCupom) = ?1", codigo.toUpperCase()).firstResultOptional();
+    }
+
     public Optional<Transacao> resgateAlunoVantagem(Aluno aluno, Vantagem vantagem) {
         return find("aluno = ?1 and vantagem = ?2 and tipo = ?3 order by criadaEm desc",
                 aluno, vantagem, TipoTransacao.RESGATE_VANTAGEM).firstResultOptional();
