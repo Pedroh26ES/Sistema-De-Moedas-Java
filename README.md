@@ -15,7 +15,7 @@
 
 ---
 
-## Visao Geral
+## ✨ Visao Geral
 
 O **Valoriza Aê** transforma participacao academica em beneficios reais. Professores enviam moedas para reconhecer boas entregas, alunos acompanham saldo e resgatam vantagens, e empresas parceiras validam cupons para confirmar que o beneficio foi usado corretamente.
 
@@ -23,7 +23,7 @@ O projeto foi evoluido para cobrir os requisitos das releases do sistema de moed
 
 ---
 
-## Fluxo Principal
+## 🔄 Fluxo Principal
 
 ```mermaid
 flowchart LR
@@ -36,9 +36,9 @@ flowchart LR
 
 ---
 
-## Perfis
+## 👥 Perfis
 
-### Aluno
+### 🎓 Aluno
 
 O aluno usa o sistema para acompanhar reconhecimento academico e trocar moedas por beneficios.
 
@@ -51,7 +51,7 @@ O aluno usa o sistema para acompanhar reconhecimento academico e trocar moedas p
 - Bloqueio contra compra repetida da mesma vantagem.
 - Recuperacao de senha por email.
 
-### Professor
+### 👩‍🏫 Professor
 
 O professor ja vem pre-cadastrado pela instituicao participante.
 
@@ -62,7 +62,7 @@ O professor ja vem pre-cadastrado pela instituicao participante.
 - Historico de envios, notificacoes e extrato filtravel.
 - Email de confirmacao quando um envio e realizado.
 
-### Empresa Parceira
+### 🏪 Empresa Parceira
 
 A empresa parceira cadastra beneficios e confirma o uso dos cupons.
 
@@ -75,29 +75,29 @@ A empresa parceira cadastra beneficios e confirma o uso dos cupons.
 
 ---
 
-## Principais Funcionalidades
+## 🚀 Principais Funcionalidades
 
-- Login por perfil com acesso restrito.
-- Interface React em estilo SaaS.
-- Dashboard separado para aluno, professor e empresa.
-- Cadastro de aluno com instituicao e curso pre-cadastrados.
-- Professores pre-cadastrados por instituicao.
-- Envio de moedas com justificativa obrigatoria.
-- Catalogo de vantagens com imagens e descricao pratica.
-- Cupom unico para cada resgate.
-- QR Code para apresentar o cupom ao parceiro.
-- Validacao do cupom pela empresa.
-- Bloqueio de cupom ja usado.
-- Pausa de vantagem com notificacao para alunos que possuem cupom pendente.
-- Extratos e notificacoes com filtro por periodo.
-- EmailJS para notificacoes reais e recuperacao de senha.
-- ViaCEP para preenchimento de endereco.
-- RabbitMQ para eventos do sistema.
-- Fallback local de fila no modo Quarkus sem Docker, mantendo rastreabilidade em desenvolvimento.
+- 🔐 Login por perfil com acesso restrito.
+- 💻 Interface React em estilo SaaS.
+- 📊 Dashboard separado para aluno, professor e empresa.
+- 🎓 Cadastro de aluno com instituicao e curso pre-cadastrados.
+- 🏫 Professores pre-cadastrados por instituicao.
+- 🪙 Envio de moedas com justificativa obrigatoria.
+- 🎁 Catalogo de vantagens com imagens e descricao pratica.
+- 🎟️ Cupom unico para cada resgate.
+- 📱 QR Code para apresentar o cupom ao parceiro.
+- ✅ Validacao do cupom pela empresa.
+- 🛡️ Bloqueio de cupom ja usado.
+- 🔔 Pausa de vantagem com notificacao para alunos que possuem cupom pendente.
+- 📄 Extratos e notificacoes com filtro por periodo.
+- ✉️ EmailJS para notificacoes reais e recuperacao de senha.
+- 📍 ViaCEP para preenchimento de endereco.
+- 🐇 RabbitMQ para eventos do sistema.
+- 🧾 Fallback local de fila no modo Quarkus sem Docker, mantendo rastreabilidade em desenvolvimento.
 
 ---
 
-## Regras de Negocio
+## ✅ Regras de Negocio
 
 - Cada usuario acessa apenas o painel do seu perfil.
 - Aluno precisa informar CPF, RG, endereco, instituicao e curso.
@@ -116,36 +116,101 @@ A empresa parceira cadastra beneficios e confirma o uso dos cupons.
 
 ---
 
-## Integracoes
+## 🔌 Integracoes
 
-### RabbitMQ
+### 🐇 RabbitMQ
 
-O sistema publica eventos operacionais como:
+O sistema publica eventos de negocio em uma fila RabbitMQ sempre que acontece uma operacao importante:
 
-- moedas enviadas;
-- cupom gerado;
-- cupom validado;
-- cupom desativado;
-- cupom reativado.
+- `MOEDAS_ENVIADAS`: professor reconheceu um aluno com moedas.
+- `CUPOM_GERADO`: aluno resgatou uma vantagem e recebeu um cupom.
+- `CUPOM_VALIDADO`: parceiro confirmou o atendimento do cupom.
+- `CUPOM_DESATIVADO`: parceiro pausou uma vantagem com cupom pendente.
+- `CUPOM_REATIVADO`: parceiro publicou novamente uma vantagem pausada.
 
-Em desenvolvimento local via `mvn quarkus:dev`, se o RabbitMQ nao estiver disponivel, o sistema usa uma fila local persistida no banco para nao travar a demonstracao. Em Docker/deploy, o RabbitMQ real pode ser exigido.
+Esses eventos deixam o envio de moedas, o resgate de vantagem, a validacao de cupom e as mudancas de status rastreaveis. Em execucao completa com Docker ou deploy, o RabbitMQ deve estar disponivel para manter a fila real ativa.
 
-### QR Code
+No desenvolvimento local pelo terminal, o projeto tambem possui fallback local de fila persistido no banco. Assim, o fluxo continua testavel mesmo quando o RabbitMQ nao estiver aberto na maquina.
 
-Ao resgatar uma vantagem, o aluno recebe um cupom e um QR Code. O parceiro pode consultar o codigo no painel de empresa e validar o atendimento.
+Configuracao principal:
 
-### ViaCEP
+```properties
+valoriza.rabbitmq.host=localhost
+valoriza.rabbitmq.port=5672
+valoriza.rabbitmq.username=guest
+valoriza.rabbitmq.password=guest
+valoriza.rabbitmq.queue=valoriza-ae.eventos
+```
 
-Usado nos cadastros para preencher o endereco a partir do CEP.
+Arquivos relacionados:
 
-### EmailJS
+- `Código/docker-compose.yml`: sobe RabbitMQ com painel de administracao e tambem pode subir a aplicacao.
+- `Código/start.ps1`: sobe o RabbitMQ, aguarda a fila ficar pronta, compila o frontend e inicia o Quarkus local.
+- `Código/start-docker.ps1`: sobe aplicacao e RabbitMQ juntos via Docker Compose.
+- `RabbitMqStartupCheck`: valida a fila na inicializacao fora dos testes.
+- `RabbitMqFilaService`: publica eventos e registra fallback local quando habilitado.
+
+Com Docker Desktop aberto, o comando recomendado para desenvolvimento e:
+
+```powershell
+.\start.ps1
+```
+
+Para subir tudo em containers:
+
+```powershell
+.\start-docker.ps1
+```
+
+Painel do RabbitMQ:
+
+```text
+http://localhost:15672
+guest / guest
+```
+
+### 📱 QR Code
+
+Todo cupom gerado no resgate possui QR Code no endpoint:
+
+```text
+GET /api/cupons/{codigo}/qrcode
+```
+
+O QR Code contem uma URL unica de validacao. Ao escanear, o parceiro abre:
+
+```text
+/empresa?cupom={codigo}
+```
+
+Assim, o campo de validacao aparece preenchido no painel da empresa. O aluno pode apresentar o QR Code no atendimento, mas o beneficio so e liberado depois que a empresa valida o cupom no sistema.
+
+No painel do aluno, o QR Code aparece no cupom recente e nas vantagens ja adquiridas. O clique na imagem amplia o QR Code para facilitar a leitura pela camera.
+
+### 📍 ViaCEP
+
+O cadastro de aluno e o cadastro de empresa consultam endereco pelo CEP usando:
+
+```text
+GET /api/cep/{cep}
+```
+
+O endpoint valida CEP com 8 digitos, consulta o ViaCEP e devolve o endereco formatado para preencher o campo automaticamente.
+
+Configuracao:
+
+```properties
+integracoes.viacep.base-url=https://viacep.com.br/ws
+```
+
+### ✉️ EmailJS
 
 Usado para emails reais de notificacao e recuperacao de senha.
 
 O template generico esta em:
 
 ```text
-Código/docs/emailjs-template-aluno.html
+docs/readme/emailjs-template-aluno.html
 ```
 
 No painel do EmailJS, o campo de destino deve usar:
@@ -162,7 +227,7 @@ O botao principal do template usa:
 
 ---
 
-## Tecnologias
+## 🧰 Tecnologias
 
 | Area | Tecnologia |
 | --- | --- |
@@ -180,7 +245,7 @@ O botao principal do template usa:
 
 ---
 
-## Estrutura
+## 🗂️ Estrutura
 
 ```text
 Sistema-De-Moedas
@@ -209,17 +274,28 @@ Sistema-De-Moedas
 |   |   |       |-- templates
 |   |   |       `-- application.properties
 |   |   `-- test
-|   |-- docs
 |   |-- docker-compose.yml
 |   |-- Dockerfile
 |   |-- start.ps1
 |   `-- start-docker.ps1
+|-- Artefatos
+|   |-- DigramaDeCasosDeUso
+|   |-- DigramaDeClasses
+|   |-- DigramaDeComponentes
+|   |-- DiagramaDeComunicacao
+|   |-- DiagramaDeDados
+|   |-- DiagramaDeImplantacao
+|   |-- DiagramaDeSequencia
+|   |-- HistoriaDeUsuario
+|   |-- diagrama-er-acesso-dados.md
+|   `-- diagrama-er-acesso-dados-release-1.md
 `-- docs
+    `-- readme
 ```
 
 ---
 
-## Como Rodar Pelo PowerShell
+## ▶️ Como Rodar Pelo PowerShell
 
 Abra o terminal na raiz do codigo:
 
@@ -251,7 +327,7 @@ Acesse:
 http://localhost:8080
 ```
 
-### Atalho
+### ⚡ Atalho
 
 Tambem existe o script:
 
@@ -263,7 +339,7 @@ Ele tenta subir o RabbitMQ por Docker Compose, compila o front-end e inicia o Qu
 
 ---
 
-## Rodando Com Docker
+## 🐳 Rodando Com Docker
 
 Na pasta `Código`:
 
@@ -279,7 +355,7 @@ Servicos previstos:
 
 ---
 
-## Acessos Iniciais
+## 🔐 Acessos Iniciais
 
 | Perfil | Email | Senha |
 | --- | --- | --- |
@@ -291,7 +367,7 @@ Esses emails de exemplo sao usados para demonstracao local. Emails reais sao env
 
 ---
 
-## Configuracoes Importantes
+## ⚙️ Configuracoes Importantes
 
 As principais variaveis podem ser sobrescritas por ambiente:
 
@@ -313,7 +389,7 @@ VALORIZA_EMAILJS_IGNORED_DOMAINS=moedas.com
 
 ---
 
-## Comandos Uteis
+## 🛠️ Comandos Uteis
 
 ```powershell
 # Compilar front-end
@@ -331,21 +407,28 @@ mvn package
 
 ---
 
-## Documentacao Complementar
+## 📚 Documentacao Complementar
 
 ```text
-Código/docs/historias-usuario-expandidas.md
-Código/docs/diagrama-er-acesso-dados.md
-Código/docs/integracoes-rabbitmq-qrcode-viacep.md
-Código/docs/release-2-3-diagramas.md
-Código/docs/emailjs-template-aluno.html
+docs/readme/historias-usuario-expandidas.md
+docs/readme/emailjs-template-aluno.html
+docs/readme/frontend-react.md
+docs/readme/release-2-3-rastreabilidade.md
+Artefatos/diagrama-er-acesso-dados.md
+Artefatos/diagrama-er-acesso-dados-release-1.md
+Artefatos/DigramaDeCasosDeUso/DiagramaDeCasosDeUso-release-2-3.md
+Artefatos/DigramaDeComponentes/DiagramaDeComponentes-release-2-3.md
+Artefatos/DiagramaDeSequencia/DiagramaDeSequencia-release-2-3.md
+Artefatos/DiagramaDeComunicacao/DiagramaDeComunicacao-release-2-3.md
+Artefatos/DiagramaDeDados/DiagramaDeDados-release-2-3.md
+Artefatos/DiagramaDeImplantacao/DiagramaDeImplantacao-release-2-3.md
 ```
 
-Esses arquivos documentam historias de usuario, DER, estrategia ORM/DAO, integracoes e releases.
+Esses arquivos documentam historias de usuario, template de email, organizacao do front-end, DER, estrategia ORM/DAO, rastreabilidade e diagramas separados por tipo.
 
 ---
 
-## Validacao
+## 🧪 Validacao
 
 Ultima validacao usada no projeto:
 
@@ -362,7 +445,7 @@ Tests run: 10, Failures: 0, Errors: 0, Skipped: 0
 
 ---
 
-## Observacoes
+## 📝 Observacoes
 
 - O banco H2 e em memoria; ao reiniciar, os dados iniciais sao recriados.
 - Os dados iniciais ficam em `Código/src/main/java/br/com/sistemamoedas/app/DadosIniciais.java`.

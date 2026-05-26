@@ -46,7 +46,17 @@ Transformar moedas academicas em um ciclo completo: reconhecimento do professor,
 - RF-11: O email de envio de moedas deve ser registrado para aluno e professor.
 - RF-12: O email de cupom deve conter codigo, link de validacao e URL do QR Code unico.
 - RF-13: O QR Code do cupom deve abrir a tela de validacao da empresa com o codigo preenchido.
-- RF-14: O projeto deve conter diagramas de sequencia, comunicacao e implantacao para as Releases 2 e 3.
+- RF-14: O sistema deve consultar o ViaCEP no cadastro de aluno e empresa para preencher o endereco a partir do CEP.
+- RF-15: O sistema deve enviar emails reais pelo EmailJS para notificacoes de moedas, cupons, validacoes e recuperacao de senha.
+- RF-16: O sistema deve permitir recuperacao de senha por link enviado ao email do usuario.
+- RF-17: O sistema deve publicar eventos operacionais em fila RabbitMQ para envio de moedas, geracao de cupom, validacao e mudanca de status de cupom.
+
+## Artefatos da entrega
+
+- ARQ-01: O diagrama de sequencia completo das Releases 2 e 3 deve ficar em `Artefatos/DiagramaDeSequencia/DiagramaDeSequencia-release-2-3.md`.
+- ARQ-02: O diagrama de comunicacao deve ficar em `Artefatos/DiagramaDeComunicacao/DiagramaDeComunicacao-release-2-3.md`.
+- ARQ-03: O diagrama de implantacao deve ficar em `Artefatos/DiagramaDeImplantacao/DiagramaDeImplantacao-release-2-3.md`.
+- ARQ-04: Casos de uso, componentes e dados impactados devem ficar em arquivos proprios dentro de `Artefatos`, usando o padrao `DiagramaTipo-release-2-3.md`.
 
 ## Regras de negocio
 
