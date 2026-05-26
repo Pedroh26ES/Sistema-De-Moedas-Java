@@ -1,25 +1,25 @@
-<h1 align="center">Valoriza Aê</h1>
+# Valoriza Aê
 
 <p align="center">
-  Plataforma de moeda estudantil para reconhecimento acadêmico, resgate de benefícios e validação de cupons por parceiros.
+  Plataforma SaaS de moeda estudantil para reconhecimento academico, resgate de beneficios e validacao de cupons por parceiros.
 </p>
 
 <p align="center">
   <img alt="Java 17" src="https://img.shields.io/badge/Java-17-007396?style=for-the-badge&logo=openjdk&logoColor=white">
-  <img alt="Quarkus" src="https://img.shields.io/badge/Quarkus-3.15-4695EB?style=for-the-badge&logo=quarkus&logoColor=white">
+  <img alt="Quarkus 3.15" src="https://img.shields.io/badge/Quarkus-3.15-4695EB?style=for-the-badge&logo=quarkus&logoColor=white">
   <img alt="React" src="https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react&logoColor=0B1F2A">
   <img alt="Vite" src="https://img.shields.io/badge/Vite-5-646CFF?style=for-the-badge&logo=vite&logoColor=white">
-  <img alt="Hibernate" src="https://img.shields.io/badge/Hibernate%20ORM-Panache-59666C?style=for-the-badge&logo=hibernate&logoColor=white">
+  <img alt="RabbitMQ" src="https://img.shields.io/badge/RabbitMQ-Eventos-FF6600?style=for-the-badge&logo=rabbitmq&logoColor=white">
   <img alt="H2" src="https://img.shields.io/badge/Banco-H2-1F7A5F?style=for-the-badge">
 </p>
 
 ---
 
-## Sobre o Projeto
+## Visao Geral
 
-O **Valoriza Aê** é um sistema acadêmico em que professores reconhecem boas entregas de alunos por meio de moedas virtuais. Os alunos acumulam essas moedas e podem resgatar benefícios cadastrados por empresas parceiras. Cada resgate gera um cupom, e a empresa parceira valida esse cupom no atendimento para confirmar a entrega do benefício.
+O **Valoriza Aê** transforma participacao academica em beneficios reais. Professores enviam moedas para reconhecer boas entregas, alunos acompanham saldo e resgatam vantagens, e empresas parceiras validam cupons para confirmar que o beneficio foi usado corretamente.
 
-O projeto atende às histórias de usuário do sistema de moeda estudantil e foi evoluído com uma interface em estilo SaaS, regras de negócio mais completas, catálogo com imagens, extratos filtráveis, notificações e controle real do ciclo de vida dos cupons.
+O projeto foi evoluido para cobrir os requisitos das releases do sistema de moeda estudantil, incluindo cadastro completo de alunos, professores pre-cadastrados por instituicao, catalogo de vantagens, QR Code de cupom, ViaCEP, EmailJS, RabbitMQ, recuperacao de senha e uma interface React com organizacao por perfil.
 
 ---
 
@@ -27,221 +27,219 @@ O projeto atende às histórias de usuário do sistema de moeda estudantil e foi
 
 ```mermaid
 flowchart LR
-    Professor["Professor reconhece mérito"] --> Moedas["Aluno recebe moedas"]
-    Moedas --> Catalogo["Aluno escolhe vantagem"]
-    Catalogo --> Cupom["Sistema gera cupom"]
-    Cupom --> Parceiro["Empresa parceira valida"]
-    Parceiro --> Historico["Extrato e notificações atualizados"]
+    A["Professor envia moedas com justificativa"] --> B["Aluno recebe saldo e notificacao"]
+    B --> C["Aluno resgata vantagem no catalogo"]
+    C --> D["Sistema gera cupom e QR Code"]
+    D --> E["Parceiro valida o cupom"]
+    E --> F["Extratos, emails e eventos sao atualizados"]
 ```
 
 ---
 
-## Perfis do Sistema
+## Perfis
 
 ### Aluno
 
-O aluno usa o sistema para acompanhar seu reconhecimento acadêmico e transformar moedas em benefícios reais.
+O aluno usa o sistema para acompanhar reconhecimento academico e trocar moedas por beneficios.
 
-Principais recursos:
-
-- Cadastro com nome, email, senha, CPF, RG, endereço, instituição e curso.
-- Seleção de instituição pré-cadastrada.
-- Seleção de curso conforme a instituição escolhida.
-- Dashboard com saldo, moedas recebidas, cupons validados e jornada do aluno.
-- Catálogo de vantagens com imagem, custo em moedas, descrição e instrução de uso do cupom.
-- Resgate de vantagens com geração automática de cupom.
-- Bloqueio para não resgatar a mesma vantagem duas vezes.
-- Extrato com filtros por hoje, semana, mês, ano e todos.
-- Notificações registradas quando recebe moedas, resgata cupom, tem cupom validado ou tem cupom temporariamente desativado.
+- Cadastro com nome, email, senha, CPF, RG, endereco, instituicao e curso.
+- Instituicoes e cursos ja ficam pre-cadastrados.
+- O curso disponivel depende da instituicao escolhida.
+- Painel com saldo, extrato, notificacoes e cupons.
+- Catalogo com vantagens, imagens, custo em moedas e instrucoes de uso.
+- Resgate de vantagem com cupom unico e QR Code.
+- Bloqueio contra compra repetida da mesma vantagem.
+- Recuperacao de senha por email.
 
 ### Professor
 
-O professor é pré-cadastrado pela instituição parceira e usa moedas para reconhecer entregas reais dos alunos.
+O professor ja vem pre-cadastrado pela instituicao participante.
 
-Principais recursos:
-
-- Perfil vinculado explicitamente a uma instituição.
-- Cadastro institucional com nome, CPF, departamento e instituição.
+- Perfil vinculado explicitamente a uma instituicao.
+- Dados institucionais: nome, CPF, departamento e instituicao.
 - Cota semestral de 1.000 moedas.
-- Envio de moedas para alunos com justificativa obrigatória.
-- Sugestões rápidas de justificativa.
-- Visualização de alunos, saldos e histórico de envios.
-- Extrato e notificações com filtros por período.
+- Envio de moedas para alunos com justificativa obrigatoria.
+- Historico de envios, notificacoes e extrato filtravel.
+- Email de confirmacao quando um envio e realizado.
 
 ### Empresa Parceira
 
-A empresa parceira cadastra benefícios e valida os cupons apresentados pelos alunos.
-
-Principais recursos:
+A empresa parceira cadastra beneficios e confirma o uso dos cupons.
 
 - Cadastro de empresa parceira.
-- Criação e edição de vantagens com título, descrição, foto, custo em moedas e status.
-- Preview da vantagem antes de publicar.
-- Catálogo parceiro com vantagens publicadas e pausadas.
-- Validação de cupom pelo código apresentado pelo aluno.
-- Fila de cupons recentes com status pendente, validado ou desativado.
-- Notificações e histórico de resgates recebidos.
+- Criacao, edicao, publicacao, pausa e exclusao de vantagens.
+- Vantagens com titulo, descricao, imagem, custo em moedas e status.
+- Validacao de cupom por codigo ou QR Code apresentado pelo aluno.
+- Historico de resgates recebidos.
+- Notificacao para cupons pendentes, validados, pausados ou reativados.
 
 ---
 
-## Regras de Negócio
+## Principais Funcionalidades
 
-- Cada usuário acessa apenas o painel do próprio perfil.
-- Aluno deve informar CPF, RG, endereço, instituição de ensino e curso.
-- As instituições participantes são pré-cadastradas.
-- Os cursos são pré-cadastrados por instituição.
-- O sistema valida se o curso escolhido pertence à instituição selecionada.
-- Professores são pré-cadastrados e vinculados a uma instituição.
-- Cada professor possui CPF, departamento, instituição e saldo de moedas.
-- O professor recebe 1.000 moedas por semestre.
-- Envio de moedas exige aluno válido, saldo suficiente, valor positivo e justificativa.
-- O aluno visualiza saldo, extrato, cupons e notificações.
-- A empresa cadastra vantagens com descrição, imagem, custo e status.
-- Cada resgate gera um cupom único.
-- O aluno não pode resgatar a mesma vantagem duas vezes.
-- A empresa valida o cupom para confirmar a entrega do benefício.
-- Cupom pendente de uma vantagem pausada fica temporariamente desativado.
-- Cupom desativado não pode ser validado até a vantagem ser publicada novamente.
-- Vantagem com cupom ou resgate vinculado não pode ser excluída, apenas pausada.
-- Vantagem sem cupom/resgate vinculado pode ser excluída.
-- Emails são registrados como notificações dentro do sistema.
+- Login por perfil com acesso restrito.
+- Interface React em estilo SaaS.
+- Dashboard separado para aluno, professor e empresa.
+- Cadastro de aluno com instituicao e curso pre-cadastrados.
+- Professores pre-cadastrados por instituicao.
+- Envio de moedas com justificativa obrigatoria.
+- Catalogo de vantagens com imagens e descricao pratica.
+- Cupom unico para cada resgate.
+- QR Code para apresentar o cupom ao parceiro.
+- Validacao do cupom pela empresa.
+- Bloqueio de cupom ja usado.
+- Pausa de vantagem com notificacao para alunos que possuem cupom pendente.
+- Extratos e notificacoes com filtro por periodo.
+- EmailJS para notificacoes reais e recuperacao de senha.
+- ViaCEP para preenchimento de endereco.
+- RabbitMQ para eventos do sistema.
+- Fallback local de fila no modo Quarkus sem Docker, mantendo rastreabilidade em desenvolvimento.
 
 ---
 
-## Vantagens, Cupons e Status
+## Regras de Negocio
 
-No sistema, uma **vantagem** é o benefício cadastrado pela empresa. Quando o aluno resgata uma vantagem, o sistema gera um **cupom**.
+- Cada usuario acessa apenas o painel do seu perfil.
+- Aluno precisa informar CPF, RG, endereco, instituicao e curso.
+- O sistema valida se o curso pertence a instituicao selecionada.
+- Professor precisa estar vinculado a uma instituicao.
+- Professor recebe cota semestral de moedas.
+- Envio de moedas exige valor positivo, saldo suficiente e justificativa.
+- Resgate desconta moedas do aluno.
+- Cada resgate gera um cupom unico.
+- Aluno nao pode resgatar a mesma vantagem duas vezes.
+- Empresa so valida cupom pertencente as suas vantagens.
+- Cupom validado nao pode ser usado novamente.
+- Vantagem pausada sai do catalogo e bloqueia validacao de cupons pendentes.
+- Vantagem com historico de cupom nao e apagada do fluxo; deve ser pausada.
+- Emails tambem ficam registrados como notificacoes internas.
 
-Status importantes:
+---
 
-| Status | Significado |
-| --- | --- |
-| Publicada | A vantagem aparece no catálogo dos alunos e pode ser resgatada. |
-| Pausada | A vantagem não aparece para novos resgates. |
-| Cupom pendente | O aluno resgatou, mas a empresa ainda não validou. |
-| Cupom validado | A empresa confirmou o atendimento. |
-| Cupom desativado | A vantagem foi pausada e o cupom pendente não pode ser usado até republicação. |
+## Integracoes
+
+### RabbitMQ
+
+O sistema publica eventos operacionais como:
+
+- moedas enviadas;
+- cupom gerado;
+- cupom validado;
+- cupom desativado;
+- cupom reativado.
+
+Em desenvolvimento local via `mvn quarkus:dev`, se o RabbitMQ nao estiver disponivel, o sistema usa uma fila local persistida no banco para nao travar a demonstracao. Em Docker/deploy, o RabbitMQ real pode ser exigido.
+
+### QR Code
+
+Ao resgatar uma vantagem, o aluno recebe um cupom e um QR Code. O parceiro pode consultar o codigo no painel de empresa e validar o atendimento.
+
+### ViaCEP
+
+Usado nos cadastros para preencher o endereco a partir do CEP.
+
+### EmailJS
+
+Usado para emails reais de notificacao e recuperacao de senha.
+
+O template generico esta em:
+
+```text
+Código/docs/emailjs-template-aluno.html
+```
+
+No painel do EmailJS, o campo de destino deve usar:
+
+```text
+{{to_email}}
+```
+
+O botao principal do template usa:
+
+```text
+{{button_url}}
+```
 
 ---
 
 ## Tecnologias
 
-| Camada | Tecnologia |
+| Area | Tecnologia |
 | --- | --- |
 | Back-end | Java 17, Quarkus 3.15 |
-| Front-end | React, Vite |
-| Renderização inicial | Qute como shell HTML da SPA |
-| Persistência | Hibernate ORM com Panache |
-| Banco de dados | H2 em memória |
-| Testes | JUnit 5, Quarkus Test |
-| Build | Maven e npm |
-| Ícones | Lucide React |
+| Front-end | React 18, Vite |
+| UI | Lucide React, CSS modularizado por telas |
+| Persistencia | JPA, Hibernate ORM, Panache |
+| Banco local | H2 em memoria |
+| Mensageria | RabbitMQ |
+| QR Code | ZXing |
+| Emails | EmailJS |
+| CEP | ViaCEP |
+| Testes | JUnit 5, Quarkus Test, Rest Assured |
+| Build | Maven, npm |
 
 ---
 
-## Arquitetura
-
-O projeto segue uma organização em camadas:
+## Estrutura
 
 ```text
-Código
-├── frontend
-│   └── src
-│       ├── main.jsx
-│       └── styles.css
-├── src
-│   ├── main
-│   │   ├── java/br/com/sistemamoedas
-│   │   │   ├── app
-│   │   │   ├── controller
-│   │   │   ├── domain
-│   │   │   ├── repository
-│   │   │   ├── security
-│   │   │   └── service
-│   │   └── resources
-│   │       ├── META-INF/resources/react
-│   │       ├── templates
-│   │       └── application.properties
-│   └── test
-│       └── java/br/com/sistemamoedas
-└── docs
-    ├── historias-usuario-expandidas.md
-    └── diagrama-er-acesso-dados.md
-```
-
-Responsabilidades principais:
-
-- `controller`: rotas web, API REST e integração com sessão.
-- `domain`: entidades JPA e enums do domínio.
-- `repository`: repositories Panache, funcionando como camada DAO.
-- `service`: regras de negócio.
-- `security`: login, sessão e senha.
-- `app`: dados iniciais do sistema.
-- `frontend`: aplicação React.
-- `templates`: shells Qute que carregam a aplicação React.
-
----
-
-## Persistência e Banco de Dados
-
-O projeto usa **Jakarta Persistence/JPA**, **Hibernate ORM** e **Quarkus Panache**.
-
-Entidades principais:
-
-- `Usuario`
-- `Aluno`
-- `Professor`
-- `EmpresaParceira`
-- `Instituicao`
-- `Curso`
-- `Vantagem`
-- `Transacao`
-- `EmailNotificacao`
-
-O banco em desenvolvimento é H2 em memória:
-
-```properties
-quarkus.datasource.db-kind=h2
-quarkus.datasource.jdbc.url=jdbc:h2:mem:valoriza-ae;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
-quarkus.hibernate-orm.database.generation=update
-```
-
-Nos testes, o schema é recriado automaticamente:
-
-```properties
-%test.quarkus.datasource.jdbc.url=jdbc:h2:mem:valoriza-ae-test;DB_CLOSE_DELAY=-1
-%test.quarkus.hibernate-orm.database.generation=drop-and-create
+Sistema-De-Moedas
+|-- README.md
+|-- Código
+|   |-- frontend
+|   |   |-- src
+|   |   |   |-- components
+|   |   |   |-- config
+|   |   |   |-- hooks
+|   |   |   |-- pages
+|   |   |   |-- services
+|   |   |   |-- styles
+|   |   |   `-- utils
+|   |-- src
+|   |   |-- main
+|   |   |   |-- java/br/com/sistemamoedas
+|   |   |   |   |-- app
+|   |   |   |   |-- controller
+|   |   |   |   |-- domain
+|   |   |   |   |-- repository
+|   |   |   |   |-- security
+|   |   |   |   `-- service
+|   |   |   `-- resources
+|   |   |       |-- META-INF/resources
+|   |   |       |-- templates
+|   |   |       `-- application.properties
+|   |   `-- test
+|   |-- docs
+|   |-- docker-compose.yml
+|   |-- Dockerfile
+|   |-- start.ps1
+|   `-- start-docker.ps1
+`-- docs
 ```
 
 ---
 
-## Como Rodar no VS Code
+## Como Rodar Pelo PowerShell
 
-Abra o terminal na raiz do projeto:
-
-```powershell
-cd C:\Users\Pichau\Desktop\Sistema-De-Moedas
-```
-
-Entre na pasta do código:
+Abra o terminal na raiz do codigo:
 
 ```powershell
-cd .\Código
+cd "C:\Users\Pichau\Desktop\Sistema-De-Moedas\Código"
 ```
 
-Instale as dependências do front-end:
+Instale as dependencias do front-end:
 
 ```powershell
 npm install
 ```
 
-Gere o bundle React:
+Compile o front-end React:
 
 ```powershell
 npm run build:frontend
 ```
 
-Inicie o servidor Quarkus:
+Inicie o Quarkus:
 
 ```powershell
 mvn quarkus:dev
@@ -253,65 +251,103 @@ Acesse:
 http://localhost:8080
 ```
 
+### Atalho
+
+Tambem existe o script:
+
+```powershell
+.\start.ps1
+```
+
+Ele tenta subir o RabbitMQ por Docker Compose, compila o front-end e inicia o Quarkus.
+
 ---
 
-## Usuários de Demonstração
+## Rodando Com Docker
+
+Na pasta `Código`:
+
+```powershell
+docker compose up --build
+```
+
+Servicos previstos:
+
+- Aplicacao: `http://localhost:8080`
+- RabbitMQ: `localhost:5672`
+- RabbitMQ Management: `http://localhost:15672`
+
+---
+
+## Acessos Iniciais
 
 | Perfil | Email | Senha |
 | --- | --- | --- |
-| Aluno | aluno@moedas.com | 123456 |
-| Professor | professor@moedas.com | 123456 |
-| Empresa Parceira | empresa@moedas.com | 123456 |
+| Aluno | aluno@moedas.com | ValorizaAe#2026! |
+| Professor | professor@moedas.com | ValorizaAe#2026! |
+| Empresa | empresa@moedas.com | ValorizaAe#2026! |
+
+Esses emails de exemplo sao usados para demonstracao local. Emails reais sao enviados pelo EmailJS quando o destinatario nao estiver em dominio interno bloqueado.
 
 ---
 
-## Comandos Úteis
+## Configuracoes Importantes
 
-Compilar o front-end:
+As principais variaveis podem ser sobrescritas por ambiente:
+
+```properties
+VALORIZA_APP_PUBLIC_URL=http://localhost:8080
+VALORIZA_RABBITMQ_HOST=localhost
+VALORIZA_RABBITMQ_PORT=5672
+VALORIZA_RABBITMQ_USERNAME=guest
+VALORIZA_RABBITMQ_PASSWORD=guest
+VALORIZA_RABBITMQ_QUEUE=valoriza-ae.eventos
+VALORIZA_RABBITMQ_LOCAL_FALLBACK=true
+VALORIZA_EMAILJS_ENABLED=true
+VALORIZA_EMAILJS_SERVICE_ID=service_hcguqt8
+VALORIZA_EMAILJS_TEMPLATE_ID=template_l6qeu1d
+VALORIZA_EMAILJS_PUBLIC_KEY=DNElHG9dfV97S6O_U
+VALORIZA_EMAILJS_PRIVATE_KEY=gu3bxQw3GZzeFNmQWuutc
+VALORIZA_EMAILJS_IGNORED_DOMAINS=moedas.com
+```
+
+---
+
+## Comandos Uteis
 
 ```powershell
+# Compilar front-end
 npm run build:frontend
-```
 
-Rodar os testes:
-
-```powershell
+# Rodar testes
 mvn test
-```
 
-Gerar pacote da aplicação:
+# Compilar back-end sem testes
+mvn -DskipTests compile
 
-```powershell
+# Gerar pacote
 mvn package
 ```
 
-Compilar o back-end sem rodar testes:
+---
 
-```powershell
-mvn -DskipTests compile
+## Documentacao Complementar
+
+```text
+Código/docs/historias-usuario-expandidas.md
+Código/docs/diagrama-er-acesso-dados.md
+Código/docs/integracoes-rabbitmq-qrcode-viacep.md
+Código/docs/release-2-3-diagramas.md
+Código/docs/emailjs-template-aluno.html
 ```
 
----
-
-## Documentação
-
-Arquivos complementares:
-
-- `Código/docs/historias-usuario-expandidas.md`
-- `Código/docs/diagrama-er-acesso-dados.md`
-
-O arquivo de diagrama inclui:
-
-- Diagrama Entidade-Relacionamento.
-- Estratégia de acesso ao banco.
-- Uso de ORM.
-- Uso de repositories como padrão DAO.
+Esses arquivos documentam historias de usuario, DER, estrategia ORM/DAO, integracoes e releases.
 
 ---
 
-## Validação Atual
+## Validacao
 
-Última validação esperada:
+Ultima validacao usada no projeto:
 
 ```powershell
 npm run build:frontend
@@ -321,14 +357,15 @@ mvn test
 Resultado esperado:
 
 ```text
-Tests run: 9, Failures: 0, Errors: 0, Skipped: 0
+Tests run: 10, Failures: 0, Errors: 0, Skipped: 0
 ```
 
 ---
 
-## Observações
+## Observacoes
 
+- O banco H2 e em memoria; ao reiniciar, os dados iniciais sao recriados.
 - Os dados iniciais ficam em `Código/src/main/java/br/com/sistemamoedas/app/DadosIniciais.java`.
-- O sistema usa H2 em memória, então os dados são recriados ao reiniciar a aplicação.
-- Para alterações no React aparecerem no navegador, rode `npm run build:frontend`.
-- O arquivo `README.md` principal fica na raiz `C:\Users\Pichau\Desktop\Sistema-De-Moedas`.
+- Para mudancas no React aparecerem no Quarkus, rode `npm run build:frontend`.
+- Para o EmailJS funcionar em deploy, `VALORIZA_APP_PUBLIC_URL` precisa apontar para a URL publica do sistema.
+- Em email real, imagens servidas por `localhost` nao carregam fora da maquina local; por isso o template de email usa uma marca visual em HTML.

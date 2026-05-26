@@ -30,6 +30,9 @@ public class MoedaService {
     EmailGateway emails;
 
     @Inject
+    EmailTemplateService emailTemplates;
+
+    @Inject
     RabbitMqFilaService filaEventos;
 
     @Transactional
@@ -77,7 +80,9 @@ public class MoedaService {
         transacoes.persist(transacao);
 
         emails.enviar(aluno.email, "Voce recebeu moedas estudantis",
-                "O professor " + professor.nome + " enviou " + valor + " moedas. Motivo: " + mensagem.trim(), null);
+                emailTemplates.moedasRecebidas(aluno, professor, valor, mensagem.trim()), null);
+        emails.enviar(professor.email, "Envio de moedas confirmado",
+                emailTemplates.moedasEnviadas(aluno, valor, mensagem.trim()), null);
         filaEventos.publicar(new EventoSistema("MOEDAS_ENVIADAS", transacao.id, null, aluno.email, professor.email,
                 null, null, valor, transacao.criadaEm.toString()));
     }

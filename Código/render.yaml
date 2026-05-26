@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: valoriza-ae-api
+    env: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /
+    envVars:
+      - key: VALORIZA_APP_PUBLIC_URL
+        value: https://valoriza-ae-api.onrender.com
+      - key: VALORIZA_CORS_ORIGINS
+        value: http://localhost:5173,http://localhost:8080,https://valoriza-ae.vercel.app
+      - key: VALORIZA_COOKIE_SAME_SITE
+        value: None
+      - key: VALORIZA_COOKIE_SECURE
+        value: "true"
+      - key: VALORIZA_RABBITMQ_HOST
+        sync: false
+      - key: VALORIZA_RABBITMQ_PORT
+        value: "5672"
+      - key: VALORIZA_RABBITMQ_USERNAME
+        sync: false
+      - key: VALORIZA_RABBITMQ_PASSWORD
+        sync: false

@@ -15,6 +15,7 @@ import jakarta.transaction.Transactional;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.List;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 @ApplicationScoped
 public class VantagemService {
@@ -38,7 +39,13 @@ public class VantagemService {
     EmailGateway emails;
 
     @Inject
+    EmailTemplateService emailTemplates;
+
+    @Inject
     RabbitMqFilaService filaEventos;
+
+    @ConfigProperty(name = "valoriza.app.public-url", defaultValue = "http://localhost:8080")
+    String publicUrl;
 
     public List<Vantagem> catalogo() {
         return vantagens.ativas();
@@ -123,11 +130,12 @@ public class VantagemService {
         transacao.mensagem = "Resgate da vantagem " + vantagem.titulo;
         transacoes.persist(transacao);
 
-        String conteudoAluno = "Cupom " + codigo + " gerado para a vantagem " + vantagem.titulo
-                + ". Apresente este codigo na troca presencial.";
-        String conteudoEmpresa = "O aluno " + aluno.nome + " resgatou " + vantagem.titulo + ". Codigo: " + codigo;
-        emails.enviar(aluno.email, "Cupom de troca gerado", conteudoAluno, codigo);
-        emails.enviar(vantagem.empresa.email, "Nova troca para validar", conteudoEmpresa, codigo);
+        String validacaoUrl = validacaoUrl(codigo);
+        String qrCodeUrl = qrCodeUrl(codigo);
+        emails.enviar(aluno.email, "Cupom de troca gerado",
+                emailTemplates.cupomAluno(vantagem, codigo, validacaoUrl, qrCodeUrl), codigo);
+        emails.enviar(vantagem.empresa.email, "Nova troca para validar",
+                emailTemplates.cupomEmpresa(aluno, vantagem, codigo, validacaoUrl, qrCodeUrl), codigo);
         filaEventos.publicar(new EventoSistema("CUPOM_GERADO", transacao.id, codigo, aluno.email, null,
                 vantagem.empresa.email, vantagem.titulo, vantagem.custoMoedas, transacao.criadaEm.toString()));
         return codigo;
@@ -151,7 +159,8 @@ public class VantagemService {
         transacao.cupomValidado = true;
         transacao.validadoEm = LocalDateTime.now();
         emails.enviar(transacao.aluno.email, "Cupom validado",
-                "Seu cupom " + transacao.codigoCupom + " foi validado por " + empresa.nome + ".", transacao.codigoCupom);
+                emailTemplates.cupomValidado(empresa, transacao.codigoCupom, transacao.vantagem.titulo),
+                transacao.codigoCupom);
         filaEventos.publicar(new EventoSistema("CUPOM_VALIDADO", transacao.id, transacao.codigoCupom,
                 transacao.aluno.email, null, empresa.email, transacao.vantagem.titulo, transacao.valor,
                 transacao.validadoEm.toString()));
@@ -193,6 +202,20 @@ public class VantagemService {
             codigo.append(CUPOM_ALFABETO.charAt(random.nextInt(CUPOM_ALFABETO.length())));
         }
         return codigo.toString();
+    }
+
+    private String validacaoUrl(String codigo) {
+        return baseUrl() + "/empresa?cupom=" + codigo;
+    }
+
+    private String qrCodeUrl(String codigo) {
+        return baseUrl() + "/api/cupons/" + codigo + "/qrcode";
+    }
+
+    private String baseUrl() {
+        return publicUrl == null || publicUrl.isBlank()
+                ? "http://localhost:8080"
+                : publicUrl.replaceAll("/+$", "");
     }
 
     private void notificarAlunosComCupomPendente(Vantagem vantagem, boolean ativa) {

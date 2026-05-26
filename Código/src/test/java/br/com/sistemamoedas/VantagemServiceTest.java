@@ -3,6 +3,7 @@ package br.com.sistemamoedas;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import br.com.sistemamoedas.domain.Aluno;
@@ -63,9 +64,9 @@ class VantagemServiceTest {
 
         assertTrue(notificacoes.porDestinatario("aluno@moedas.com").stream()
                 .anyMatch(email -> "Cupom temporariamente desativado".equals(email.assunto)
-                        && "SME-DEMO2026".equals(email.codigoReferencia)));
+                        && "SME-CAMPUS26".equals(email.codigoReferencia)));
         RegraNegocioException erro = assertThrows(RegraNegocioException.class,
-                () -> vantagens.validarCupom(voucher.empresa.id, "SME-DEMO2026"));
+                () -> vantagens.validarCupom(voucher.empresa.id, "SME-CAMPUS26"));
         assertTrue(erro.getMessage().contains("desativado"));
 
         vantagens.alterarStatus(voucher.empresa.id, voucher.id, true);
@@ -86,5 +87,22 @@ class VantagemServiceTest {
                 () -> vantagens.excluir(voucherComCupom.empresa.id, voucherComCupom.id));
 
         assertTrue(erro.getMessage().contains("Pause a vantagem"));
+    }
+
+    @Test
+    void emailDeCupomDeveOrientarUsoSemExporRotasTecnicas() {
+        Aluno aluno = alunos.find("email", "aluno@moedas.com").firstResult();
+        Vantagem base = vantagemRepository.find("titulo", "Combo cafe e estudo").firstResult();
+        Vantagem vantagem = vantagens.cadastrar(base.empresa.id, "Passe rapido de teste", base.descricao,
+                base.fotoUrl, 10);
+
+        String codigo = vantagens.resgatar(aluno.id, vantagem.id);
+
+        assertNotNull(codigo);
+        assertTrue(notificacoes.porDestinatario(aluno.email).stream()
+                .anyMatch(email -> codigo.equals(email.codigoReferencia)
+                        && email.conteudo.contains("QR Code e o status ficam disponiveis no seu painel")
+                        && !email.conteudo.contains("/api/cupons/")
+                        && !email.conteudo.contains("/empresa?cupom=")));
     }
 }

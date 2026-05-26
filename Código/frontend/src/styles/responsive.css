@@ -1,0 +1,164 @@
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+.auth-required .surface-card {
+  max-width: 440px;
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+}
+
+@media (max-width: 980px) {
+  .marketing-nav,
+  .dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .hero-section {
+    min-height: 640px;
+  }
+
+  .hero-content,
+  .value-section,
+  .workflow-section {
+    grid-template-columns: 1fr;
+  }
+
+  .impact-strip,
+  .dashboard-grid,
+  .dashboard-insight-grid,
+  .company-ops-grid,
+  .identity-details,
+  .advantage-grid,
+  .work-grid,
+  .auth-card {
+    grid-template-columns: 1fr;
+  }
+
+  .section-title-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .section-title-row.compact {
+    align-items: flex-start;
+  }
+
+  .catalog-toolbar {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .app-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    position: static;
+    height: auto;
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .sidebar nav {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 620px) {
+  .marketing-page,
+  .auth-page,
+  .dashboard-main {
+    width: min(100% - 24px, 1180px);
+  }
+
+  .nav-actions,
+  .hero-actions,
+  .trust-row,
+  .catalog-toolbar,
+  .search-field,
+  .sidebar nav {
+    width: 100%;
+  }
+
+  .primary-button,
+  .outline-button,
+  .ghost-button,
+  .danger-button,
+  .sidebar-link {
+    width: 100%;
+  }
+
+  .hero-copy h1 {
+    font-size: 2.7rem;
+  }
+
+  .hero-section {
+    min-height: 660px;
+    border-radius: 8px;
+  }
+
+  .hero-content {
+    padding: 24px;
+  }
+
+  .benefit-grid,
+  .workflow-step {
+    grid-template-columns: 1fr;
+  }
+
+  .impact-strip article {
+    grid-template-columns: auto 1fr;
+  }
+
+  .auth-visual {
+    min-height: 300px;
+  }
+
+  .grid-form {
+    grid-template-columns: 1fr;
+  }
+
+  .segmented-controls,
+  .inline-form,
+  .input-action-row,
+  .coupon-pass,
+  .coupon-form,
+  .coupon-status-grid,
+  .coupon-queue-item,
+  .bonus-summary,
+  .bonus-level-list article,
+  .send-plan-breakdown {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    grid-template-columns: 1fr;
+  }
+
+  .period-select,
+  .period-select select,
+  .coupon-form .primary-button {
+    width: 100%;
+  }
+
+  .student-row {
+    grid-template-columns: 1fr;
+  }
+
+  .send-plan-card {
+    grid-template-rows: 180px minmax(0, 1fr);
+  }
+
+  .signup-choice-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -25,15 +25,16 @@ Transformar moedas academicas em um ciclo completo: reconhecimento do professor,
 ### Empresa parceira
 
 - Como empresa parceira, quero cadastrar vantagens com foto, descricao, custo e status para manter meu catalogo atualizado.
-- Como empresa parceira, quero duplicar uma vantagem existente para criar ofertas semelhantes com rapidez.
 - Como empresa parceira, quero ver um preview da vantagem antes de salvar para reduzir erros no catalogo.
 - Como empresa parceira, quero consultar e validar cupons pelo codigo para confirmar que a troca presencial aconteceu.
 - Como empresa parceira, quero acompanhar cupons pendentes e validados para controlar atendimentos e beneficios entregues.
+- Como empresa parceira, quero pausar uma vantagem sem apagar historico para impedir novos resgates enquanto mantenho os cupons ja gerados rastreaveis.
+- Como empresa parceira, quero excluir vantagens que ainda nao possuem resgate para manter o catalogo limpo.
 
 ## Requisitos funcionais adicionados
 
 - RF-01: O sistema deve exibir o nome Valoriza Aê em paginas, shell React e documentacao.
-- RF-02: O sistema deve criar dados iniciais mais ricos: mais alunos, mais empresas parceiras, mais vantagens e resgates demonstrativos.
+- RF-02: O sistema deve criar dados iniciais mais ricos: mais alunos, mais empresas parceiras, mais vantagens e resgates iniciais.
 - RF-03: O sistema deve armazenar status de validacao do cupom em cada transacao de resgate.
 - RF-04: O sistema deve permitir que a empresa valide um cupom somente se ele pertence a ela.
 - RF-05: O sistema deve impedir validacao duplicada do mesmo cupom.
@@ -42,6 +43,10 @@ Transformar moedas academicas em um ciclo completo: reconhecimento do professor,
 - RF-08: O painel do aluno deve mostrar progresso, filtros do catalogo e resumo de impacto das moedas.
 - RF-09: O painel do professor deve mostrar alunos com saldo e ferramentas de envio mais rapidas.
 - RF-10: O painel da empresa deve mostrar cupons pendentes, validados, consulta de cupom e preview de vantagem.
+- RF-11: O email de envio de moedas deve ser registrado para aluno e professor.
+- RF-12: O email de cupom deve conter codigo, link de validacao e URL do QR Code unico.
+- RF-13: O QR Code do cupom deve abrir a tela de validacao da empresa com o codigo preenchido.
+- RF-14: O projeto deve conter diagramas de sequencia, comunicacao e implantacao para as Releases 2 e 3.
 
 ## Regras de negocio
 

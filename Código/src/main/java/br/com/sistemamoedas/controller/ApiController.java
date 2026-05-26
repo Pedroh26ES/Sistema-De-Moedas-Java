@@ -12,6 +12,7 @@ import br.com.sistemamoedas.repository.AlunoRepository;
 import br.com.sistemamoedas.repository.CursoRepository;
 import br.com.sistemamoedas.repository.EmailNotificacaoRepository;
 import br.com.sistemamoedas.repository.TransacaoRepository;
+import br.com.sistemamoedas.security.RecuperacaoSenhaService;
 import br.com.sistemamoedas.security.SessaoService;
 import br.com.sistemamoedas.security.SessaoUsuario;
 import br.com.sistemamoedas.service.AlunoService;
@@ -40,6 +41,7 @@ import jakarta.ws.rs.core.UriInfo;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 @Path("/api")
 @Produces(MediaType.APPLICATION_JSON)
@@ -48,6 +50,9 @@ public class ApiController {
 
     @Inject
     SessaoService sessoes;
+
+    @Inject
+    RecuperacaoSenhaService recuperacaoSenha;
 
     @Inject
     CadastroService cadastros;
@@ -79,6 +84,9 @@ public class ApiController {
     @Inject
     ViaCepService viaCep;
 
+    @ConfigProperty(name = "valoriza.app.public-url", defaultValue = "http://localhost:8080")
+    String publicUrl;
+
     @GET
     @Path("me")
     public Response me(@CookieParam(SessaoService.COOKIE) String token) {
@@ -105,6 +113,20 @@ public class ApiController {
         return Response.ok(new MessageDto("Sessao encerrada."))
                 .header(HttpHeaders.SET_COOKIE, Web.cookieExpirado(SessaoService.COOKIE))
                 .build();
+    }
+
+    @POST
+    @Path("senha/esqueci")
+    public MessageDto solicitarRecuperacaoSenha(RecuperacaoSenhaRequest request) {
+        recuperacaoSenha.solicitar(request.email());
+        return new MessageDto("Se este email estiver cadastrado, enviaremos um link para redefinir a senha.");
+    }
+
+    @POST
+    @Path("senha/redefinir")
+    public MessageDto redefinirSenha(RedefinirSenhaRequest request) {
+        recuperacaoSenha.redefinir(request.token(), request.novaSenha());
+        return new MessageDto("Senha atualizada com sucesso. Entre novamente com sua nova senha.");
     }
 
     @GET
@@ -187,10 +209,7 @@ public class ApiController {
                 .queryParam("cupom", transacao.codigoCupom)
                 .build()
                 .toString();
-        String conteudo = "Valoriza Ae\nCupom: " + transacao.codigoCupom
-                + "\nAluno: " + transacao.aluno.nome
-                + "\nVantagem: " + transacao.vantagem.titulo
-                + "\nValidar em: " + validacaoUrl;
+        String conteudo = validacaoUrl;
         return Response.ok(qrCodes.gerarPng(conteudo))
                 .type("image/png")
                 .header(HttpHeaders.CACHE_CONTROL, "no-store")
@@ -361,7 +380,15 @@ public class ApiController {
     }
 
     private String qrCodeUrl(String codigoCupom) {
-        return codigoCupom == null || codigoCupom.isBlank() ? null : "/api/cupons/" + codigoCupom + "/qrcode";
+        return codigoCupom == null || codigoCupom.isBlank()
+                ? null
+                : baseUrl() + "/api/cupons/" + codigoCupom + "/qrcode";
+    }
+
+    private String baseUrl() {
+        return publicUrl == null || publicUrl.isBlank()
+                ? "http://localhost:8080"
+                : publicUrl.replaceAll("/+$", "");
     }
 
     public record ErrorDto(String mensagem) {
@@ -371,6 +398,12 @@ public class ApiController {
     }
 
     public record LoginRequest(String email, String senha) {
+    }
+
+    public record RecuperacaoSenhaRequest(String email) {
+    }
+
+    public record RedefinirSenhaRequest(String token, String novaSenha) {
     }
 
     public record CadastroAlunoRequest(String nome, String email, String senha, String cpf, String rg, String endereco,

@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import br.com.sistemamoedas.domain.Aluno;
 import br.com.sistemamoedas.domain.Professor;
 import br.com.sistemamoedas.repository.AlunoRepository;
+import br.com.sistemamoedas.repository.EmailNotificacaoRepository;
 import br.com.sistemamoedas.repository.ProfessorRepository;
 import br.com.sistemamoedas.repository.TransacaoRepository;
 import br.com.sistemamoedas.service.MoedaService;
@@ -30,6 +31,9 @@ class MoedaServiceTest {
     @Inject
     TransacaoRepository transacoes;
 
+    @Inject
+    EmailNotificacaoRepository notificacoes;
+
     @Test
     void deveEnviarMoedasComJustificativaEAtualizarExtratos() {
         Professor professor = professores.find("email", "professor@moedas.com").firstResult();
@@ -47,6 +51,9 @@ class MoedaServiceTest {
         assertEquals(saldoAlunoAntes + 25, alunoAtualizado.saldoMoedas);
         assertTrue(transacoes.extratoAluno(alunoAtualizado).stream()
                 .anyMatch(t -> "Participacao excelente em aula".equals(t.mensagem)));
+        assertTrue(notificacoes.porDestinatario(professor.email).stream()
+                .anyMatch(email -> "Envio de moedas confirmado".equals(email.assunto)
+                        && email.conteudo.contains(aluno.nome)));
     }
 
     @Test

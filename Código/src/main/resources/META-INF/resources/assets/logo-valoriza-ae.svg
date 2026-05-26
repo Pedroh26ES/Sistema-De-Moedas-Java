@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Valoriza Ae">
+  <defs>
+    <linearGradient id="cap" x1="31" x2="103" y1="25" y2="91" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#063a5f"/>
+      <stop offset="1" stop-color="#021f36"/>
+    </linearGradient>
+    <linearGradient id="coin" x1="45" x2="87" y1="52" y2="108" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ffd23f"/>
+      <stop offset="1" stop-color="#f4a900"/>
+    </linearGradient>
+  </defs>
+  <path d="M18 45.4 60.1 27.2a10 10 0 0 1 7.8 0L110 45.4c4.6 2 4.6 8.4 0 10.4L82.5 67.7C77.4 62.8 70.8 60.2 64 60.2s-13.4 2.6-18.5 7.5L18 55.8c-4.6-2-4.6-8.4 0-10.4Z" fill="url(#cap)"/>
+  <path d="M44.2 67.3c5.5-5.1 12.4-7.7 19.8-7.7s14.3 2.6 19.8 7.7v17.5c-5.6-5.6-12.4-8.4-19.8-8.4s-14.2 2.8-19.8 8.4V67.3Z" fill="url(#cap)"/>
+  <path d="M101.7 53.2v33.2" stroke="url(#cap)" stroke-linecap="round" stroke-width="7"/>
+  <circle cx="101.7" cy="89.8" r="6.3" fill="url(#cap)"/>
+  <path d="M94.7 96.5 101.7 88.8l7 7.7 2.3 17.3H92.4l2.3-17.3Z" fill="url(#cap)"/>
+  <circle cx="64" cy="82.5" r="32.5" fill="url(#coin)"/>
+  <circle cx="64" cy="82.5" r="26.6" fill="none" stroke="#fff" stroke-width="6.2"/>
+</svg>

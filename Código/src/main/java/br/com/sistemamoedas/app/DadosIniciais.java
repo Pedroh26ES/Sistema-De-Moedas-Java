@@ -2,6 +2,7 @@ package br.com.sistemamoedas.app;
 
 import br.com.sistemamoedas.domain.Aluno;
 import br.com.sistemamoedas.domain.Curso;
+import br.com.sistemamoedas.domain.EmailNotificacao;
 import br.com.sistemamoedas.domain.EmpresaParceira;
 import br.com.sistemamoedas.domain.Instituicao;
 import br.com.sistemamoedas.domain.Professor;
@@ -10,13 +11,14 @@ import br.com.sistemamoedas.domain.Transacao;
 import br.com.sistemamoedas.domain.Vantagem;
 import br.com.sistemamoedas.repository.AlunoRepository;
 import br.com.sistemamoedas.repository.CursoRepository;
+import br.com.sistemamoedas.repository.EmailNotificacaoRepository;
 import br.com.sistemamoedas.repository.EmpresaParceiraRepository;
 import br.com.sistemamoedas.repository.InstituicaoRepository;
 import br.com.sistemamoedas.repository.ProfessorRepository;
 import br.com.sistemamoedas.repository.TransacaoRepository;
 import br.com.sistemamoedas.repository.VantagemRepository;
 import br.com.sistemamoedas.security.SenhaService;
-import br.com.sistemamoedas.service.EmailGateway;
+import br.com.sistemamoedas.service.EmailTemplateService;
 import br.com.sistemamoedas.service.MoedaService;
 import br.com.sistemamoedas.service.SemestreUtil;
 import io.quarkus.runtime.StartupEvent;
@@ -25,9 +27,12 @@ import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 @ApplicationScoped
 public class DadosIniciais {
+
+    private static final String SENHA_ACESSO_INICIAL = "ValorizaAe#2026!";
 
     @Inject
     InstituicaoRepository instituicoes;
@@ -54,7 +59,13 @@ public class DadosIniciais {
     SenhaService senhas;
 
     @Inject
-    EmailGateway emails;
+    EmailNotificacaoRepository emails;
+
+    @Inject
+    EmailTemplateService emailTemplates;
+
+    @ConfigProperty(name = "valoriza.app.public-url", defaultValue = "http://localhost:8080")
+    String publicUrl;
 
     @Transactional
     void onStart(@Observes StartupEvent event) {
@@ -87,7 +98,8 @@ public class DadosIniciais {
         salvarCurso(cefet, "Sistemas de Informacao");
 
         if (professores.count() == 0) {
-            Professor professor = new Professor("Professor Demo", "professor@moedas.com", senhas.gerarHash("123456"),
+            Professor professor = new Professor("Mariana Torres", "professor@moedas.com",
+                    senhas.gerarHash(SENHA_ACESSO_INICIAL),
                     "11122233344", "Engenharia de Software", puc);
             professor.saldoMoedas = MoedaService.COTA_SEMESTRAL;
             professor.ultimoCreditoSemestral = SemestreUtil.atual();
@@ -102,30 +114,36 @@ public class DadosIniciais {
         }
 
         if (alunos.count() == 0) {
-            Aluno aluno = new Aluno("Aluno Demo", "aluno@moedas.com", senhas.gerarHash("123456"), "55566677788",
+            Aluno aluno = new Aluno("Rafael Martins", "aluno@moedas.com", senhas.gerarHash(SENHA_ACESSO_INICIAL),
+                    "55566677788",
                     "MG123456", "Rua da Universidade, 100", puc, "Engenharia de Software");
             alunos.persist(aluno);
 
-            Aluno marina = new Aluno("Marina Lima", "marina@moedas.com", senhas.gerarHash("123456"), "44455566677",
+            Aluno marina = new Aluno("Marina Lima", "marina@moedas.com", senhas.gerarHash(SENHA_ACESSO_INICIAL),
+                    "44455566677",
                     "MG654321", "Avenida do Campus, 45", puc, "Sistemas de Informacao");
             alunos.persist(marina);
         }
 
         if (alunos.find("email", "marina@moedas.com").firstResult() == null) {
-            alunos.persist(new Aluno("Marina Lima", "marina@moedas.com", senhas.gerarHash("123456"), "44455566677",
+            alunos.persist(new Aluno("Marina Lima", "marina@moedas.com", senhas.gerarHash(SENHA_ACESSO_INICIAL),
+                    "44455566677",
                     "MG654321", "Avenida do Campus, 45", puc, "Sistemas de Informacao"));
         }
 
         if (empresas.count() == 0) {
             EmpresaParceira empresa = new EmpresaParceira("Cantina Parceira", "empresa@moedas.com",
-                    senhas.gerarHash("123456"), "12345678000190", "Campus Principal", "31 99999-0000");
+                    senhas.gerarHash(SENHA_ACESSO_INICIAL), "12345678000190", "Campus Principal", "31 99999-0000");
             empresas.persist(empresa);
         }
 
         if (empresas.find("email", "livraria@moedas.com").firstResult() == null) {
             empresas.persist(new EmpresaParceira("Livraria Saber", "livraria@moedas.com",
-                    senhas.gerarHash("123456"), "34567890000112", "Bloco B - Campus Principal", "31 98888-1212"));
+                    senhas.gerarHash(SENHA_ACESSO_INICIAL), "34567890000112", "Bloco B - Campus Principal",
+                    "31 98888-1212"));
         }
+
+        atualizarSenhasAcessoInicial();
 
         EmpresaParceira empresa = empresas.find("email", "empresa@moedas.com").firstResult();
         if (empresa != null) {
@@ -183,17 +201,17 @@ public class DadosIniciais {
             transacao.mensagem = "Participacao consistente nas atividades praticas do laboratorio.";
             transacoes.persist(transacao);
 
-            emails.enviar(aluno.email, "Voce recebeu moedas estudantis",
-                    "O professor " + professor.nome + " enviou " + valor
-                            + " moedas. Motivo: " + transacao.mensagem,
-                    null);
+            registrarEmailInicial(aluno.email, "Voce recebeu moedas estudantis",
+                    emailTemplates.moedasRecebidas(aluno, professor, valor, transacao.mensagem), null);
+            registrarEmailInicial(professor.email, "Envio de moedas confirmado",
+                    emailTemplates.moedasEnviadas(aluno, valor, transacao.mensagem), null);
         }
 
-        criarResgateDemo(aluno, "Voucher de impressao", "SME-DEMO2026", false);
-        criarResgateDemo(aluno, "Desconto na cantina", "SME-USADO25", true);
+        criarResgateInicial(aluno, "Voucher de impressao", "SME-CAMPUS26", false);
+        criarResgateInicial(aluno, "Desconto na cantina", "SME-USADO25", true);
     }
 
-    private void criarResgateDemo(Aluno aluno, String tituloVantagem, String codigo, boolean validado) {
+    private void criarResgateInicial(Aluno aluno, String tituloVantagem, String codigo, boolean validado) {
         if (aluno == null || transacoes.find("codigoCupom", codigo).firstResult() != null) {
             return;
         }
@@ -215,10 +233,17 @@ public class DadosIniciais {
         transacao.mensagem = "Resgate da vantagem " + vantagem.titulo;
         transacoes.persist(transacao);
 
-        emails.enviar(aluno.email, "Cupom de troca gerado",
-                "Cupom " + codigo + " gerado para a vantagem " + vantagem.titulo + ".", codigo);
-        emails.enviar(vantagem.empresa.email, validado ? "Cupom ja validado no atendimento" : "Nova troca para validar",
-                "O aluno " + aluno.nome + " resgatou " + vantagem.titulo + ". Codigo: " + codigo, codigo);
+        String validacaoUrl = baseUrl() + "/empresa?cupom=" + codigo;
+        String qrCodeUrl = baseUrl() + "/api/cupons/" + codigo + "/qrcode";
+        registrarEmailInicial(aluno.email, "Cupom de troca gerado",
+                emailTemplates.cupomAluno(vantagem, codigo, validacaoUrl, qrCodeUrl), codigo);
+        registrarEmailInicial(vantagem.empresa.email,
+                validado ? "Cupom ja validado no atendimento" : "Nova troca para validar",
+                emailTemplates.cupomEmpresa(aluno, vantagem, codigo, validacaoUrl, qrCodeUrl), codigo);
+    }
+
+    private void registrarEmailInicial(String destinatario, String assunto, String conteudo, String codigoReferencia) {
+        emails.persist(new EmailNotificacao(destinatario, assunto, conteudo, codigoReferencia));
     }
 
     private void salvarOuAtualizarVantagem(EmpresaParceira empresa, String titulo, String descricao, String fotoUrl,
@@ -240,5 +265,38 @@ public class DadosIniciais {
             return;
         }
         cursos.persist(new Curso(nome, instituicao));
+    }
+
+    private void atualizarSenhasAcessoInicial() {
+        Professor professor = professores.find("email", "professor@moedas.com").firstResult();
+        if (professor != null) {
+            professor.senhaHash = senhas.gerarHash(SENHA_ACESSO_INICIAL);
+        }
+
+        Aluno aluno = alunos.find("email", "aluno@moedas.com").firstResult();
+        if (aluno != null) {
+            aluno.senhaHash = senhas.gerarHash(SENHA_ACESSO_INICIAL);
+        }
+
+        Aluno marina = alunos.find("email", "marina@moedas.com").firstResult();
+        if (marina != null) {
+            marina.senhaHash = senhas.gerarHash(SENHA_ACESSO_INICIAL);
+        }
+
+        EmpresaParceira empresa = empresas.find("email", "empresa@moedas.com").firstResult();
+        if (empresa != null) {
+            empresa.senhaHash = senhas.gerarHash(SENHA_ACESSO_INICIAL);
+        }
+
+        EmpresaParceira livraria = empresas.find("email", "livraria@moedas.com").firstResult();
+        if (livraria != null) {
+            livraria.senhaHash = senhas.gerarHash(SENHA_ACESSO_INICIAL);
+        }
+    }
+
+    private String baseUrl() {
+        return publicUrl == null || publicUrl.isBlank()
+                ? "http://localhost:8080"
+                : publicUrl.replaceAll("/+$", "");
     }
 }

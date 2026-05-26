@@ -1,0 +1,51 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: valoriza-ae-app
+    restart: unless-stopped
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      PORT: 8080
+      VALORIZA_APP_PUBLIC_URL: http://localhost:8080
+      VALORIZA_CORS_ORIGINS: http://localhost:5173,http://localhost:8080
+      VALORIZA_RABBITMQ_HOST: rabbitmq
+      VALORIZA_RABBITMQ_PORT: 5672
+      VALORIZA_RABBITMQ_USERNAME: guest
+      VALORIZA_RABBITMQ_PASSWORD: guest
+      VALORIZA_RABBITMQ_QUEUE: valoriza-ae.eventos
+      VALORIZA_RABBITMQ_FAIL_ON_STARTUP: "true"
+      VALORIZA_RABBITMQ_AUTO_START: "false"
+      VALORIZA_RABBITMQ_LOCAL_FALLBACK: "false"
+      VALORIZA_EMAILJS_ENABLED: "true"
+      VALORIZA_EMAILJS_SERVICE_ID: service_hcguqt8
+      VALORIZA_EMAILJS_TEMPLATE_ID: template_l6qeu1d
+      VALORIZA_EMAILJS_PUBLIC_KEY: DNElHG9dfV97S6O_U
+      VALORIZA_EMAILJS_PRIVATE_KEY: gu3bxQw3GZzeFNmQWuutc
+      VALORIZA_EMAILJS_IGNORED_DOMAINS: moedas.com
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: valoriza-rabbitmq
+    restart: unless-stopped
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+    volumes:
+      - valoriza-rabbitmq-data:/var/lib/rabbitmq
+
+volumes:
+  valoriza-rabbitmq-data:

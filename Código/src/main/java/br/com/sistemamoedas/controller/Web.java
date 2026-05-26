@@ -24,14 +24,25 @@ final class Web {
     }
 
     static String cookieSessao(String nome, String token) {
-        return nome + "=" + token + "; Path=/; HttpOnly; SameSite=Lax; Max-Age=28800";
+        return nome + "=" + token + atributosCookie("28800");
     }
 
     static String cookieExpirado(String nome) {
-        return nome + "=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0";
+        return nome + "=" + atributosCookie("0");
     }
 
     private static String encode(String valor) {
         return URLEncoder.encode(valor, StandardCharsets.UTF_8);
+    }
+
+    private static String atributosCookie(String maxAge) {
+        String sameSite = env("VALORIZA_COOKIE_SAME_SITE", "Lax");
+        boolean secure = Boolean.parseBoolean(env("VALORIZA_COOKIE_SECURE", "false"));
+        return "; Path=/; HttpOnly; SameSite=" + sameSite + "; Max-Age=" + maxAge + (secure ? "; Secure" : "");
+    }
+
+    private static String env(String nome, String padrao) {
+        String valor = System.getenv(nome);
+        return valor == null || valor.isBlank() ? padrao : valor;
     }
 }
