@@ -43,9 +43,9 @@ public class CadastroController {
     public Response criarAluno(@FormParam("nome") String nome, @FormParam("email") String email,
             @FormParam("senha") String senha, @FormParam("cpf") String cpf, @FormParam("rg") String rg,
             @FormParam("endereco") String endereco, @FormParam("instituicaoId") Long instituicaoId,
-            @FormParam("curso") String curso) {
+            @FormParam("curso") String curso, @FormParam("telefoneWhatsapp") String telefoneWhatsapp) {
         try {
-            cadastros.cadastrarAluno(nome, email, senha, cpf, rg, endereco, instituicaoId, curso);
+            cadastros.cadastrarAluno(nome, email, senha, cpf, rg, endereco, instituicaoId, curso, telefoneWhatsapp);
             return Web.redirectComMensagem("/login", "mensagem", "Aluno cadastrado. Entre com seu email e senha.");
         } catch (RegraNegocioException e) {
             return Web.redirectComMensagem("/alunos/novo", "erro", e.getMessage());
@@ -64,9 +64,9 @@ public class CadastroController {
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public Response criarEmpresa(@FormParam("nome") String nome, @FormParam("email") String email,
             @FormParam("senha") String senha, @FormParam("cnpj") String cnpj, @FormParam("endereco") String endereco,
-            @FormParam("contato") String contato) {
+            @FormParam("contato") String contato, @FormParam("telefoneWhatsapp") String telefoneWhatsapp) {
         try {
-            cadastros.cadastrarEmpresa(nome, email, senha, cnpj, endereco, contato);
+            cadastros.cadastrarEmpresa(nome, email, senha, cnpj, endereco, contato, telefoneWhatsapp);
             return Web.redirectComMensagem("/login", "mensagem", "Empresa cadastrada. Entre com seu email e senha.");
         } catch (RegraNegocioException e) {
             return Web.redirectComMensagem("/empresas/nova", "erro", e.getMessage());

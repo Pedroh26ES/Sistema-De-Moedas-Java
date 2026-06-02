@@ -33,6 +33,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 public class DadosIniciais {
 
     private static final String SENHA_ACESSO_INICIAL = "ValorizaAe#2026!";
+    private static final String WHATSAPP_TESTE = "";
 
     @Inject
     InstituicaoRepository instituicoes;
@@ -101,6 +102,7 @@ public class DadosIniciais {
             Professor professor = new Professor("Mariana Torres", "professor@moedas.com",
                     senhas.gerarHash(SENHA_ACESSO_INICIAL),
                     "11122233344", "Engenharia de Software", puc);
+            professor.telefoneWhatsapp = WHATSAPP_TESTE;
             professor.saldoMoedas = MoedaService.COTA_SEMESTRAL;
             professor.ultimoCreditoSemestral = SemestreUtil.atual();
             professores.persist(professor);
@@ -117,6 +119,7 @@ public class DadosIniciais {
             Aluno aluno = new Aluno("Rafael Martins", "aluno@moedas.com", senhas.gerarHash(SENHA_ACESSO_INICIAL),
                     "55566677788",
                     "MG123456", "Rua da Universidade, 100", puc, "Engenharia de Software");
+            aluno.telefoneWhatsapp = WHATSAPP_TESTE;
             alunos.persist(aluno);
 
             Aluno marina = new Aluno("Marina Lima", "marina@moedas.com", senhas.gerarHash(SENHA_ACESSO_INICIAL),
@@ -134,6 +137,7 @@ public class DadosIniciais {
         if (empresas.count() == 0) {
             EmpresaParceira empresa = new EmpresaParceira("Cantina Parceira", "empresa@moedas.com",
                     senhas.gerarHash(SENHA_ACESSO_INICIAL), "12345678000190", "Campus Principal", "31 99999-0000");
+            empresa.telefoneWhatsapp = WHATSAPP_TESTE;
             empresas.persist(empresa);
         }
 
@@ -144,6 +148,7 @@ public class DadosIniciais {
         }
 
         atualizarSenhasAcessoInicial();
+        atualizarWhatsappAcessoInicial();
 
         EmpresaParceira empresa = empresas.find("email", "empresa@moedas.com").firstResult();
         if (empresa != null) {
@@ -291,6 +296,23 @@ public class DadosIniciais {
         EmpresaParceira livraria = empresas.find("email", "livraria@moedas.com").firstResult();
         if (livraria != null) {
             livraria.senhaHash = senhas.gerarHash(SENHA_ACESSO_INICIAL);
+        }
+    }
+
+    private void atualizarWhatsappAcessoInicial() {
+        Professor professor = professores.find("email", "professor@moedas.com").firstResult();
+        if (professor != null) {
+            professor.telefoneWhatsapp = WHATSAPP_TESTE;
+        }
+
+        Aluno aluno = alunos.find("email", "aluno@moedas.com").firstResult();
+        if (aluno != null) {
+            aluno.telefoneWhatsapp = WHATSAPP_TESTE;
+        }
+
+        EmpresaParceira empresa = empresas.find("email", "empresa@moedas.com").firstResult();
+        if (empresa != null) {
+            empresa.telefoneWhatsapp = WHATSAPP_TESTE;
         }
     }
 

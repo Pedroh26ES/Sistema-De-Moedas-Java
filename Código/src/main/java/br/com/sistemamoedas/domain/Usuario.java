@@ -27,6 +27,9 @@ public abstract class Usuario extends PanacheEntity {
     @Column(nullable = false, length = 20)
     public Perfil perfil;
 
-    @Column(nullable = false)
+    
+    @Column(length = 32)
+    public String telefoneWhatsapp;
+@Column(nullable = false)
     public boolean ativo = true;
 }

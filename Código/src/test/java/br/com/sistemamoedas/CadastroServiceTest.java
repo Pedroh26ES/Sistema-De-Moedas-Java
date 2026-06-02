@@ -1,4 +1,4 @@
-﻿package br.com.sistemamoedas;
+package br.com.sistemamoedas;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -29,7 +29,7 @@ class CadastroServiceTest {
 
         Aluno aluno = cadastros.cadastrarAluno("Aluno Curso", "aluno-curso-" + sufixo + "@moedas.com", "ValorizaAe#2026!",
                 "900" + sufixo.substring(0, 8), "MG" + sufixo.substring(0, 6), "Rua do Curso, 10", puc.id,
-                "Engenharia de Software");
+                "Engenharia de Software", null);
 
         assertEquals("Engenharia de Software", aluno.curso);
         assertEquals("PUC Minas", aluno.instituicao.nome);
@@ -43,7 +43,7 @@ class CadastroServiceTest {
         RegraNegocioException erro = assertThrows(RegraNegocioException.class,
                 () -> cadastros.cadastrarAluno("Aluno Curso Invalido", "aluno-invalido-" + sufixo + "@moedas.com",
                         "ValorizaAe#2026!", "901" + sufixo.substring(0, 8), "MG" + sufixo.substring(0, 6),
-                        "Rua do Curso, 20", puc.id, "Medicina"));
+                        "Rua do Curso, 20", puc.id, "Medicina", null));
 
         assertTrue(erro.getMessage().contains("Curso invalido"));
     }

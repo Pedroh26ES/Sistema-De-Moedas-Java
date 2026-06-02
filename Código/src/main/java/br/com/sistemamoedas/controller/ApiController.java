@@ -145,7 +145,7 @@ public class ApiController {
     @Path("alunos")
     public Response cadastrarAluno(CadastroAlunoRequest request) {
         Aluno aluno = cadastros.cadastrarAluno(request.nome(), request.email(), request.senha(), request.cpf(),
-                request.rg(), request.endereco(), request.instituicaoId(), request.curso());
+                request.rg(), request.endereco(), request.instituicaoId(), request.curso(), request.telefoneWhatsapp());
         return Response.status(Response.Status.CREATED).entity(toAluno(aluno)).build();
     }
 
@@ -153,7 +153,7 @@ public class ApiController {
     @Path("empresas")
     public Response cadastrarEmpresa(CadastroEmpresaRequest request) {
         EmpresaParceira empresa = cadastros.cadastrarEmpresa(request.nome(), request.email(), request.senha(),
-                request.cnpj(), request.endereco(), request.contato());
+                request.cnpj(), request.endereco(), request.contato(), request.telefoneWhatsapp());
         return Response.status(Response.Status.CREATED).entity(toEmpresa(empresa)).build();
     }
 
@@ -323,7 +323,7 @@ public class ApiController {
 
     private AlunoDto toAluno(Aluno aluno) {
         return new AlunoDto(aluno.id, aluno.nome, aluno.email, aluno.cpf, aluno.rg, aluno.endereco,
-                aluno.instituicao.nome, aluno.curso, aluno.saldoMoedas);
+                aluno.instituicao.nome, aluno.curso, aluno.saldoMoedas, aluno.telefoneWhatsapp);
     }
 
     private AlunoOptionDto toAlunoOption(Aluno aluno) {
@@ -336,7 +336,8 @@ public class ApiController {
     }
 
     private EmpresaDto toEmpresa(EmpresaParceira empresa) {
-        return new EmpresaDto(empresa.id, empresa.nome, empresa.email, empresa.cnpj, empresa.endereco, empresa.contato);
+        return new EmpresaDto(empresa.id, empresa.nome, empresa.email, empresa.cnpj, empresa.endereco, empresa.contato,
+                empresa.telefoneWhatsapp);
     }
 
     private VantagemDto toVantagem(Vantagem vantagem) {
@@ -407,11 +408,11 @@ public class ApiController {
     }
 
     public record CadastroAlunoRequest(String nome, String email, String senha, String cpf, String rg, String endereco,
-            Long instituicaoId, String curso) {
+            Long instituicaoId, String curso, String telefoneWhatsapp) {
     }
 
     public record CadastroEmpresaRequest(String nome, String email, String senha, String cnpj, String endereco,
-            String contato) {
+            String contato, String telefoneWhatsapp) {
     }
 
     public record ResgateRequest(Long vantagemId) {
@@ -436,7 +437,7 @@ public class ApiController {
     }
 
     public record AlunoDto(Long id, String nome, String email, String cpf, String rg, String endereco,
-            String instituicao, String curso, int saldoMoedas) {
+            String instituicao, String curso, int saldoMoedas, String telefoneWhatsapp) {
     }
 
     public record AlunoOptionDto(Long id, String nome, String email, String curso, int saldoMoedas) {
@@ -446,7 +447,8 @@ public class ApiController {
             int saldoMoedas, String ultimoCreditoSemestral) {
     }
 
-    public record EmpresaDto(Long id, String nome, String email, String cnpj, String endereco, String contato) {
+    public record EmpresaDto(Long id, String nome, String email, String cnpj, String endereco, String contato,
+            String telefoneWhatsapp) {
     }
 
     public record VantagemDto(Long id, String titulo, String descricao, String fotoUrl, int custoMoedas, boolean ativa,

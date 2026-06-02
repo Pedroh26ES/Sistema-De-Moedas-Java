@@ -203,6 +203,7 @@ function CadastroAluno({ notify }) {
   const [form, setForm] = useState({
     nome: "",
     email: "",
+    telefoneWhatsapp: "",
     senha: "",
     cpf: "",
     rg: "",
@@ -275,6 +276,7 @@ function CadastroAluno({ notify }) {
       <form className="grid-form" onSubmit={submit}>
         <Field label="Nome" value={form.nome} onChange={(nome) => setForm({ ...form, nome })} />
         <Field label="Email" type="email" value={form.email} onChange={(email) => setForm({ ...form, email })} />
+        <Field label="WhatsApp (opcional)" value={form.telefoneWhatsapp} onChange={(telefoneWhatsapp) => setForm({ ...form, telefoneWhatsapp })} />
         <Field label="Senha" type="password" value={form.senha} onChange={(senha) => setForm({ ...form, senha })} />
         <Field label="CPF" value={form.cpf} onChange={(cpf) => setForm({ ...form, cpf })} />
         <Field label="RG" value={form.rg} onChange={(rg) => setForm({ ...form, rg })} />
@@ -316,7 +318,7 @@ function CadastroAluno({ notify }) {
 }
 
 function CadastroEmpresa({ notify }) {
-  const [form, setForm] = useState({ nome: "", email: "", senha: "", cnpj: "", cep: "", endereco: "", contato: "" });
+  const [form, setForm] = useState({ nome: "", email: "", telefoneWhatsapp: "", senha: "", cnpj: "", cep: "", endereco: "", contato: "" });
   const [cepLoading, setCepLoading] = useState(false);
 
   const submit = async (event) => {
@@ -361,6 +363,7 @@ function CadastroEmpresa({ notify }) {
         <Field label="Senha" type="password" value={form.senha} onChange={(senha) => setForm({ ...form, senha })} />
         <Field label="CNPJ" value={form.cnpj} onChange={(cnpj) => setForm({ ...form, cnpj })} />
         <Field label="Contato" value={form.contato} onChange={(contato) => setForm({ ...form, contato })} />
+        <Field label="WhatsApp para avisos (opcional)" value={form.telefoneWhatsapp} onChange={(telefoneWhatsapp) => setForm({ ...form, telefoneWhatsapp })} />
         <label>CEP
           <div className="input-action-row">
             <input

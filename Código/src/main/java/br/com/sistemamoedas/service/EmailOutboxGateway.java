@@ -36,7 +36,10 @@ public class EmailOutboxGateway implements EmailGateway {
     @Inject
     EmailNotificacaoRepository emails;
 
+    
     @Inject
+    WhatsappGateway whatsapps;
+@Inject
     ObjectMapper objectMapper;
 
     @ConfigProperty(name = "valoriza.emailjs.enabled", defaultValue = "true")
@@ -67,6 +70,7 @@ public class EmailOutboxGateway implements EmailGateway {
     @Transactional
     public void enviar(String destinatario, String assunto, String conteudo, String codigoReferencia) {
         emails.persist(new EmailNotificacao(destinatario, assunto, conteudo, codigoReferencia));
+        whatsapps.enviar(destinatario, assunto, conteudo, codigoReferencia);
         if (!deveEnviarEmailReal(destinatario)) {
             LOG.infof("Email registrado no painel para %s: %s", destinatario, assunto);
             return;

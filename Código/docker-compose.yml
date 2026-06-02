@@ -8,6 +8,8 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
+      waha:
+        condition: service_started
     ports:
       - "8080:8080"
     environment:
@@ -28,6 +30,29 @@ services:
       VALORIZA_EMAILJS_PUBLIC_KEY: DNElHG9dfV97S6O_U
       VALORIZA_EMAILJS_PRIVATE_KEY: gu3bxQw3GZzeFNmQWuutc
       VALORIZA_EMAILJS_IGNORED_DOMAINS: moedas.com
+      VALORIZA_WHATSAPP_ENABLED: "false"
+      VALORIZA_WHATSAPP_ENDPOINT: http://waha:3000
+      VALORIZA_WHATSAPP_SESSION: default
+      VALORIZA_WHATSAPP_API_KEY: valoriza-waha-key
+      VALORIZA_WHATSAPP_FAIL_ON_ERROR: "false"
+      VALORIZA_WHATSAPP_RECIPIENT_OVERRIDES: ""
+
+  waha:
+    image: devlikeapro/waha:latest
+    container_name: valoriza-waha
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      WAHA_API_KEY: valoriza-waha-key
+      WAHA_DASHBOARD_USERNAME: admin
+      WAHA_DASHBOARD_PASSWORD: ValorizaAeWaha2026
+      WHATSAPP_SWAGGER_USERNAME: admin
+      WHATSAPP_SWAGGER_PASSWORD: ValorizaAeWaha2026
+      WHATSAPP_HOOK_URL: ${VALORIZA_WAHA_HOOK_URL:-http://host.docker.internal:8080/api/whatsapp/webhook}
+      WHATSAPP_HOOK_EVENTS: ${VALORIZA_WAHA_HOOK_EVENTS:-message}
+    volumes:
+      - valoriza-waha-sessions:/app/.sessions
 
   rabbitmq:
     image: rabbitmq:3-management
@@ -49,3 +74,4 @@ services:
 
 volumes:
   valoriza-rabbitmq-data:
+  valoriza-waha-sessions:

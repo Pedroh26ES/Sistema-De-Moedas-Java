@@ -42,7 +42,7 @@ public class CadastroService {
 
     @Transactional
     public Aluno cadastrarAluno(String nome, String email, String senha, String cpf, String rg, String endereco,
-            Long instituicaoId, String curso) {
+            Long instituicaoId, String curso, String telefoneWhatsapp) {
         validarObrigatorio(nome, "Nome");
         validarObrigatorio(email, "Email");
         validarObrigatorio(cpf, "CPF");
@@ -64,13 +64,14 @@ public class CadastroService {
                 .orElseThrow(() -> new RegraNegocioException("Curso invalido para a instituicao selecionada."));
         Aluno aluno = new Aluno(nome.trim(), email.trim().toLowerCase(), senhas.gerarHash(senha), cpf.trim(), rg.trim(),
                 endereco.trim(), instituicao, cursoSelecionado.nome);
+        aluno.telefoneWhatsapp = normalizarWhatsapp(telefoneWhatsapp);
         alunos.persist(aluno);
         return aluno;
     }
 
     @Transactional
     public EmpresaParceira cadastrarEmpresa(String nome, String email, String senha, String cnpj, String endereco,
-            String contato) {
+            String contato, String telefoneWhatsapp) {
         validarObrigatorio(nome, "Nome");
         validarObrigatorio(email, "Email");
         validarObrigatorio(cnpj, "CNPJ");
@@ -84,8 +85,26 @@ public class CadastroService {
         }
         EmpresaParceira empresa = new EmpresaParceira(nome.trim(), email.trim().toLowerCase(), senhas.gerarHash(senha),
                 cnpj.trim(), endereco.trim(), contato.trim());
+        empresa.telefoneWhatsapp = normalizarWhatsapp(telefoneWhatsapp);
         empresas.persist(empresa);
         return empresa;
+    }
+
+    private String normalizarWhatsapp(String valor) {
+        if (valor == null || valor.isBlank()) {
+            return null;
+        }
+        String digitos = valor.replaceAll("\\D+", "");
+        if (digitos.isBlank()) {
+            return null;
+        }
+        if (digitos.length() == 10 || digitos.length() == 11) {
+            digitos = "55" + digitos;
+        }
+        if (digitos.length() < 12 || digitos.length() > 13) {
+            throw new RegraNegocioException("WhatsApp deve conter DDD e numero valido.");
+        }
+        return digitos;
     }
 
     private void validarObrigatorio(String valor, String campo) {
