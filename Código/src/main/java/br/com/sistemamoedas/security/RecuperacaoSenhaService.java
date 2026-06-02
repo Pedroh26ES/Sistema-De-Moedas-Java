@@ -42,7 +42,7 @@ public class RecuperacaoSenhaService {
         }
         Optional<Usuario> usuarioEncontrado = usuarios.porEmail(email).filter(usuario -> usuario.ativo);
         if (usuarioEncontrado.isEmpty()) {
-            throw new RegraNegocioException("Este email nao esta cadastrado no Valoriza Ae.");
+            return;
         }
 
         Usuario usuario = usuarioEncontrado.get();

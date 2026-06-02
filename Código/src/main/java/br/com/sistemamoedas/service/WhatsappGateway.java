@@ -6,6 +6,11 @@ public interface WhatsappGateway {
 
     void enviarParaChat(String chatId, String mensagem);
 
-    default void enviarLogoParaChat(String chatId, String legenda) {
+    default boolean enviarLogoParaChat(String chatId, String legenda) {
+        return false;
+    }
+
+    default boolean enviarImagemParaChat(String chatId, byte[] png, String nomeArquivo, String legenda) {
+        return false;
     }
 }

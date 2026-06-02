@@ -15,6 +15,7 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -34,9 +35,6 @@ public class WahaWhatsappGateway implements WhatsappGateway {
 
     private static final Logger LOG = Logger.getLogger(WahaWhatsappGateway.class);
     private static final String APP_NAME = "Valoriza Ae";
-    private final HttpClient httpClient = HttpClient.newBuilder()
-            .connectTimeout(Duration.ofSeconds(8))
-            .build();
 
     @Inject
     UsuarioRepository usuarios;
@@ -71,13 +69,16 @@ public class WahaWhatsappGateway implements WhatsappGateway {
     @ConfigProperty(name = "valoriza.whatsapp.typing-enabled", defaultValue = "true")
     boolean typingEnabled;
 
-    @ConfigProperty(name = "valoriza.whatsapp.typing-min-ms", defaultValue = "900")
+    @ConfigProperty(name = "valoriza.whatsapp.typing-start-delay-ms", defaultValue = "4500")
+    int typingStartDelayMs;
+
+    @ConfigProperty(name = "valoriza.whatsapp.typing-min-ms", defaultValue = "3200")
     int typingMinMs;
 
-    @ConfigProperty(name = "valoriza.whatsapp.typing-max-ms", defaultValue = "3200")
+    @ConfigProperty(name = "valoriza.whatsapp.typing-max-ms", defaultValue = "16000")
     int typingMaxMs;
 
-    @ConfigProperty(name = "valoriza.whatsapp.typing-ms-per-char", defaultValue = "18")
+    @ConfigProperty(name = "valoriza.whatsapp.typing-ms-per-char", defaultValue = "65")
     int typingMsPerChar;
 
     @ConfigProperty(name = "valoriza.app.public-url", defaultValue = "http://localhost:8080")
@@ -125,6 +126,45 @@ public class WahaWhatsappGateway implements WhatsappGateway {
         }
     }
 
+    @Override
+    public boolean enviarLogoParaChat(String chatId, String legenda) {
+        if (!enabled) {
+            return false;
+        }
+        String normalizado = normalizarChatId(chatId);
+        if (normalizado.isBlank()) {
+            LOG.info("Logo WhatsApp nao enviada: chatId invalido.");
+            return false;
+        }
+        try {
+            enviarImagemPeloWaha(normalizado, "valoriza-ae.png", logoPngBase64(), legenda);
+            return true;
+        } catch (Exception erro) {
+            tratarFalha(new RegraNegocioException("Nao foi possivel enviar a logo pelo WAHA."), normalizado, erro);
+            return false;
+        }
+    }
+
+    @Override
+    public boolean enviarImagemParaChat(String chatId, byte[] png, String nomeArquivo, String legenda) {
+        if (!enabled || png == null || png.length == 0) {
+            return false;
+        }
+        String normalizado = normalizarChatId(chatId);
+        if (normalizado.isBlank()) {
+            LOG.info("Imagem WhatsApp nao enviada: chatId invalido.");
+            return false;
+        }
+        String arquivo = nomeArquivo == null || nomeArquivo.isBlank() ? "valoriza-ae-cupom.png" : nomeArquivo.trim();
+        try {
+            enviarImagemPeloWaha(normalizado, arquivo, Base64.getEncoder().encodeToString(png), legenda);
+            LOG.infof("Imagem WhatsApp enviada pelo WAHA para %s: %s", normalizado, arquivo);
+            return true;
+        } catch (Exception erro) {
+            tratarFalha(new RegraNegocioException("Nao foi possivel enviar a imagem pelo WAHA."), normalizado, erro);
+            return false;
+        }
+    }
     private Optional<String> resolverChatId(String destinatario) {
         String email = destinatario == null ? "" : destinatario.trim().toLowerCase(Locale.ROOT);
         Optional<String> override = buscarOverride(email);
@@ -199,6 +239,7 @@ public class WahaWhatsappGateway implements WhatsappGateway {
             return;
         }
 
+        esperarAberturaAtendimento();
         sinalizarPresenca(chatId, "typing");
         esperarTempoDigitacao(mensagem);
         try {
@@ -208,8 +249,15 @@ public class WahaWhatsappGateway implements WhatsappGateway {
         }
     }
 
+    private void esperarAberturaAtendimento() {
+        esperar(Math.max(0, typingStartDelayMs));
+    }
+
     private void esperarTempoDigitacao(String mensagem) {
-        long tempo = tempoDigitacaoMs(mensagem);
+        esperar(tempoDigitacaoMs(mensagem));
+    }
+
+    private void esperar(long tempo) {
         if (tempo <= 0) {
             return;
         }
@@ -239,13 +287,14 @@ public class WahaWhatsappGateway implements WhatsappGateway {
             payload.put("presence", presenca);
 
             HttpRequest.Builder builder = HttpRequest.newBuilder(URI.create(endpointBase() + "/api/" + sessaoAtual() + "/presence"))
+                    .version(HttpClient.Version.HTTP_1_1)
                     .timeout(Duration.ofSeconds(8))
                     .header("Accept", "application/json")
                     .header("Content-Type", "application/json");
             apiKey.filter(valor -> !valor.isBlank())
                     .ifPresent(valor -> builder.header("X-Api-Key", valor.trim()));
 
-            HttpResponse<String> response = httpClient.send(
+            HttpResponse<String> response = enviarRequisicaoWaha(
                     builder.POST(HttpRequest.BodyPublishers.ofString(objectMapper.writeValueAsString(payload))).build(),
                     HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() < 200 || response.statusCode() >= 300) {
@@ -257,11 +306,11 @@ public class WahaWhatsappGateway implements WhatsappGateway {
     }
 
 
-    private void enviarImagemPeloWaha(String chatId, String legenda) throws Exception {
+    private void enviarImagemPeloWaha(String chatId, String nomeArquivo, String pngBase64, String legenda) throws Exception {
         Map<String, Object> arquivo = new LinkedHashMap<>();
         arquivo.put("mimetype", "image/png");
-        arquivo.put("filename", "valoriza-ae.png");
-        arquivo.put("data", logoPngBase64());
+        arquivo.put("filename", nomeArquivo);
+        arquivo.put("data", pngBase64);
 
         Map<String, Object> payload = new LinkedHashMap<>();
         payload.put("session", sessaoAtual());
@@ -270,20 +319,20 @@ public class WahaWhatsappGateway implements WhatsappGateway {
         payload.put("caption", legenda);
 
         HttpRequest.Builder builder = HttpRequest.newBuilder(URI.create(endpointBase() + "/api/sendImage"))
+                .version(HttpClient.Version.HTTP_1_1)
                 .timeout(Duration.ofSeconds(15))
                 .header("Accept", "application/json")
                 .header("Content-Type", "application/json");
         apiKey.filter(valor -> !valor.isBlank())
                 .ifPresent(valor -> builder.header("X-Api-Key", valor.trim()));
 
-        HttpResponse<String> response = httpClient.send(
+        HttpResponse<String> response = enviarRequisicaoWaha(
                 builder.POST(HttpRequest.BodyPublishers.ofString(objectMapper.writeValueAsString(payload))).build(),
                 HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() < 200 || response.statusCode() >= 300) {
-            throw new RegraNegocioException("WAHA recusou o envio da logo: " + resumoResposta(response.body()));
+            throw new RegraNegocioException("WAHA recusou o envio da imagem: " + resumoResposta(response.body()));
         }
     }
-
     private String logoPngBase64() throws Exception {
         int size = 512;
         BufferedImage image = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
@@ -350,18 +399,36 @@ public class WahaWhatsappGateway implements WhatsappGateway {
         payload.put("text", mensagem);
 
         HttpRequest.Builder builder = HttpRequest.newBuilder(URI.create(endpointBase() + "/api/sendText"))
+                .version(HttpClient.Version.HTTP_1_1)
                 .timeout(Duration.ofSeconds(12))
                 .header("Accept", "application/json")
                 .header("Content-Type", "application/json");
         apiKey.filter(valor -> !valor.isBlank())
                 .ifPresent(valor -> builder.header("X-Api-Key", valor.trim()));
 
-        HttpResponse<String> response = httpClient.send(
+        HttpResponse<String> response = enviarRequisicaoWaha(
                 builder.POST(HttpRequest.BodyPublishers.ofString(objectMapper.writeValueAsString(payload))).build(),
                 HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() < 200 || response.statusCode() >= 300) {
             throw new RegraNegocioException("WAHA recusou o envio do WhatsApp: " + resumoResposta(response.body()));
         }
+    }
+
+    private HttpResponse<String> enviarRequisicaoWaha(HttpRequest request,
+            HttpResponse.BodyHandler<String> bodyHandler) throws IOException, InterruptedException {
+        try {
+            return novoClienteWaha().send(request, bodyHandler);
+        } catch (IOException erro) {
+            LOG.warnf(erro, "Conexao local com o WAHA fechou antes da resposta. Tentando novamente.");
+            return novoClienteWaha().send(request, bodyHandler);
+        }
+    }
+
+    private HttpClient novoClienteWaha() {
+        return HttpClient.newBuilder()
+                .version(HttpClient.Version.HTTP_1_1)
+                .connectTimeout(Duration.ofSeconds(8))
+                .build();
     }
 
     private String montarMensagem(String assunto, String conteudo, String codigoReferencia) {
@@ -422,3 +489,4 @@ public class WahaWhatsappGateway implements WhatsappGateway {
         LOG.warnf(causa, "WhatsApp nao enviado para %s. %s", destinatario, erro.getMessage());
     }
 }
+

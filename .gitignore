@@ -1,0 +1,7 @@
+.env
+.env.*
+!.env.example
+*.log
+Código/.env
+Código/.env.*
+!Código/.env.example

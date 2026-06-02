@@ -27,10 +27,10 @@ public class RabbitMqFilaService {
     @ConfigProperty(name = "valoriza.rabbitmq.port", defaultValue = "5672")
     int port;
 
-    @ConfigProperty(name = "valoriza.rabbitmq.username", defaultValue = "guest")
+    @ConfigProperty(name = "valoriza.rabbitmq.username", defaultValue = "valoriza")
     String username;
 
-    @ConfigProperty(name = "valoriza.rabbitmq.password", defaultValue = "guest")
+    @ConfigProperty(name = "valoriza.rabbitmq.password", defaultValue = "valoriza-local-rabbitmq")
     String password;
 
     @ConfigProperty(name = "valoriza.rabbitmq.queue", defaultValue = "valoriza-ae.eventos")

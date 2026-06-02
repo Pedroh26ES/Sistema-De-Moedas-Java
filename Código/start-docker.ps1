@@ -3,6 +3,19 @@ $ErrorActionPreference = "Stop"
 $projectDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 Set-Location $projectDir
 
+function New-LocalSecret {
+    param([string]$Prefix)
+    return "$Prefix-$([guid]::NewGuid().ToString("N").Substring(0, 18))"
+}
+
+function Ensure-LocalSecrets {
+    if (-not $env:VALORIZA_WHATSAPP_API_KEY) { $env:VALORIZA_WHATSAPP_API_KEY=New-LocalSecret "waha" }
+    if (-not $env:VALORIZA_WAHA_DASHBOARD_USERNAME) { $env:VALORIZA_WAHA_DASHBOARD_USERNAME="admin" }
+    if (-not $env:VALORIZA_WAHA_DASHBOARD_PASSWORD) { $env:VALORIZA_WAHA_DASHBOARD_PASSWORD=New-LocalSecret "dashboard" }
+    if (-not $env:VALORIZA_RABBITMQ_USERNAME) { $env:VALORIZA_RABBITMQ_USERNAME="valoriza" }
+    if (-not $env:VALORIZA_RABBITMQ_PASSWORD) { $env:VALORIZA_RABBITMQ_PASSWORD="valoriza-local-rabbitmq" }
+}
+
 function Resolve-DockerCommand {
     $docker = Get-Command docker -ErrorAction SilentlyContinue
     if ($docker) {
@@ -44,8 +57,12 @@ function Resolve-DockerDesktopCommand {
 
 function Test-DockerDaemon {
     param([string]$DockerCommand)
-    & $DockerCommand info *> $null
-    return $LASTEXITCODE -eq 0
+    try {
+        & $DockerCommand info *> $null
+        return $LASTEXITCODE -eq 0
+    } catch {
+        return $false
+    }
 }
 
 function Ensure-DockerDaemon {
@@ -84,8 +101,10 @@ function Ensure-DockerDaemon {
 $docker = Resolve-DockerCommand
 Ensure-DockerDaemon $docker
 
+Ensure-LocalSecrets
 if (-not $env:VALORIZA_WAHA_HOOK_URL) { $env:VALORIZA_WAHA_HOOK_URL="http://app:8080/api/whatsapp/webhook" }
 if (-not $env:VALORIZA_WAHA_HOOK_EVENTS) { $env:VALORIZA_WAHA_HOOK_EVENTS="message" }
+Write-Host "WAHA dashboard: $env:VALORIZA_WAHA_DASHBOARD_USERNAME / $env:VALORIZA_WAHA_DASHBOARD_PASSWORD" -ForegroundColor Cyan
 
 Write-Host "Subindo Valoriza Ae completo com RabbitMQ e WAHA..."
 & $docker compose up --build

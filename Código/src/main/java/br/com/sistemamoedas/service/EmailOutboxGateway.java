@@ -42,20 +42,20 @@ public class EmailOutboxGateway implements EmailGateway {
 @Inject
     ObjectMapper objectMapper;
 
-    @ConfigProperty(name = "valoriza.emailjs.enabled", defaultValue = "true")
+    @ConfigProperty(name = "valoriza.emailjs.enabled", defaultValue = "false")
     boolean emailJsEnabled;
 
     @ConfigProperty(name = "valoriza.emailjs.endpoint", defaultValue = "https://api.emailjs.com/api/v1.0/email/send")
     String emailJsEndpoint;
 
-    @ConfigProperty(name = "valoriza.emailjs.service-id", defaultValue = "service_hcguqt8")
-    String emailJsServiceId;
+    @ConfigProperty(name = "valoriza.emailjs.service-id")
+    Optional<String> emailJsServiceId;
 
-    @ConfigProperty(name = "valoriza.emailjs.template-id", defaultValue = "template_l6qeu1d")
-    String emailJsTemplateId;
+    @ConfigProperty(name = "valoriza.emailjs.template-id")
+    Optional<String> emailJsTemplateId;
 
-    @ConfigProperty(name = "valoriza.emailjs.public-key", defaultValue = "DNElHG9dfV97S6O_U")
-    String emailJsPublicKey;
+    @ConfigProperty(name = "valoriza.emailjs.public-key")
+    Optional<String> emailJsPublicKey;
 
     @ConfigProperty(name = "valoriza.app.public-url", defaultValue = "http://localhost:8080")
     String publicUrl;
@@ -101,9 +101,9 @@ public class EmailOutboxGateway implements EmailGateway {
         validarConfiguracaoEmailJs();
         try {
             Map<String, Object> payload = new LinkedHashMap<>();
-            payload.put("service_id", emailJsServiceId);
-            payload.put("template_id", emailJsTemplateId);
-            payload.put("user_id", emailJsPublicKey);
+            payload.put("service_id", configObrigatoria(emailJsServiceId));
+            payload.put("template_id", configObrigatoria(emailJsTemplateId));
+            payload.put("user_id", configObrigatoria(emailJsPublicKey));
             emailJsPrivateKey
                     .filter(valor -> !valor.isBlank())
                     .ifPresent(valor -> payload.put("accessToken", valor));
@@ -190,11 +190,17 @@ public class EmailOutboxGateway implements EmailGateway {
     }
 
     private void validarConfiguracaoEmailJs() {
-        if (emailJsServiceId == null || emailJsServiceId.isBlank()
-                || emailJsTemplateId == null || emailJsTemplateId.isBlank()
-                || emailJsPublicKey == null || emailJsPublicKey.isBlank()) {
+        if (configObrigatoria(emailJsServiceId).isBlank()
+                || configObrigatoria(emailJsTemplateId).isBlank()
+                || configObrigatoria(emailJsPublicKey).isBlank()) {
             throw new RegraNegocioException("Configuracao do EmailJS incompleta.");
         }
+    }
+
+    private String configObrigatoria(Optional<String> valor) {
+        return valor.filter(item -> item != null && !item.isBlank())
+                .map(String::trim)
+                .orElse("");
     }
 
     private EmailTemplateModel montarModelo(String assunto, String conteudo, String codigoReferencia) {

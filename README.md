@@ -1,15 +1,5 @@
-# 🎓 Valoriza Aê
-
 <p align="center">
-  Plataforma SaaS de moeda estudantil para reconhecer boas entregas acadêmicas, transformar moedas em benefícios reais e validar cupons com parceiros.
-</p>
-
-<p align="center">
-  <img alt="Java 17" src="https://img.shields.io/badge/Java-17-007396?style=for-the-badge&logo=openjdk&logoColor=white">
-  <img alt="Quarkus 3.15" src="https://img.shields.io/badge/Quarkus-3.15-4695EB?style=for-the-badge&logo=quarkus&logoColor=white">
-  <img alt="React" src="https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react&logoColor=0B1F2A">
-  <img alt="RabbitMQ" src="https://img.shields.io/badge/RabbitMQ-Eventos-FF6600?style=for-the-badge&logo=rabbitmq&logoColor=white">
-  <img alt="WAHA" src="https://img.shields.io/badge/WhatsApp-WAHA-25D366?style=for-the-badge&logo=whatsapp&logoColor=white">
+  <img src="assets/valoriza-ae-banner.svg" alt="Valoriza Aê - sistema de moeda estudantil" width="100%">
 </p>
 
 ---
@@ -336,19 +326,19 @@ Abra exatamente com barra no final:
 http://localhost:3000/dashboard/
 ```
 
-Credenciais locais configuradas no `docker-compose.yml`:
+Credenciais locais configuradas por variável de ambiente:
 
 ```text
-Usuário: admin
-Senha: ValorizaAeWaha2026
+Usuário: VALORIZA_WAHA_DASHBOARD_USERNAME
+Senha: VALORIZA_WAHA_DASHBOARD_PASSWORD
 ```
 
-A senha `admin` não funciona porque o WAHA rejeita senha fraca em versões novas.
+O `start.ps1` gera valores temporários quando essas variáveis não existem e mostra no terminal o usuário e a senha do dashboard WAHA.
 
 Se o navegador guardar credencial errada e mostrar `ERR_INVALID_AUTH_CREDENTIALS`, tente:
 
 ```text
-http://admin:ValorizaAeWaha2026@localhost:3000/dashboard/
+http://localhost:3000/dashboard/
 ```
 
 ou limpe as credenciais salvas do navegador.
@@ -358,7 +348,7 @@ ou limpe as credenciais salvas do navegador.
 A API key configurada no projeto é:
 
 ```text
-valoriza-waha-key
+$env:VALORIZA_WHATSAPP_API_KEY
 ```
 
 Ela aparece em:
@@ -380,7 +370,7 @@ Configuração correta:
 ```text
 Name: WAHA
 API URL: http://localhost:3000
-API Key: valoriza-waha-key
+API Key: $env:VALORIZA_WHATSAPP_API_KEY
 ```
 
 Erro comum:
@@ -397,7 +387,7 @@ Solução:
 
 - apagar o Worker vermelho;
 - manter o Worker verde;
-- usar API key `valoriza-waha-key`.
+- usar API key `$env:VALORIZA_WHATSAPP_API_KEY`.
 
 ### 9. Criar ou usar a sessão `default`
 
@@ -472,7 +462,7 @@ POST /api/whatsapp/webhook
 No PowerShell:
 
 ```powershell
-Invoke-RestMethod -Uri "http://localhost:3000/api/server/status" -Headers @{"X-Api-Key"="valoriza-waha-key"} | ConvertTo-Json -Depth 8
+Invoke-RestMethod -Uri "http://localhost:3000/api/server/status" -Headers @{"X-Api-Key"="$env:VALORIZA_WHATSAPP_API_KEY"} | ConvertTo-Json -Depth 8
 ```
 
 Se retornar status do servidor, a API está acessível.
@@ -480,7 +470,7 @@ Se retornar status do servidor, a API está acessível.
 Também dá para conferir as sessões:
 
 ```powershell
-Invoke-RestMethod -Uri "http://localhost:3000/api/sessions?all=true" -Headers @{"X-Api-Key"="valoriza-waha-key"} | ConvertTo-Json -Depth 8
+Invoke-RestMethod -Uri "http://localhost:3000/api/sessions?all=true" -Headers @{"X-Api-Key"="$env:VALORIZA_WHATSAPP_API_KEY"} | ConvertTo-Json -Depth 8
 ```
 
 Procure por:
@@ -495,7 +485,7 @@ status: WORKING
 Esse teste valida se o WAHA consegue enviar mensagem pela sessão conectada:
 
 ```powershell
-Invoke-RestMethod -Uri "http://localhost:3000/api/sendText" -Method POST -Headers @{"X-Api-Key"="valoriza-waha-key"} -ContentType "application/json" -Body '{"session":"default","chatId":"55SEUNUMEROSEMONONO@c.us","text":"Teste WAHA funcionando no Valoriza Aê."}'
+Invoke-RestMethod -Uri "http://localhost:3000/api/sendText" -Method POST -Headers @{"X-Api-Key"="$env:VALORIZA_WHATSAPP_API_KEY"} -ContentType "application/json" -Body '{"session":"default","chatId":"55SEUNUMEROSEMONONO@c.us","text":"Teste WAHA funcionando no Valoriza Aê."}'
 ```
 
 Observação: em números brasileiros, o WhatsApp às vezes mostra o identificador sem o nono dígito. Por isso o sistema aceita variações como:
@@ -623,8 +613,8 @@ valoriza.whatsapp.typing-ms-per-char=18
 | --- | --- | --- |
 | `docker não é reconhecido` | Docker não instalado ou terminal sem PATH | Instale/abra Docker Desktop e reinicie o VS Code |
 | `dockerDesktopLinuxEngine` | Docker instalado, mas motor parado | Abra Docker Desktop e espere iniciar |
-| `ERR_INVALID_AUTH_CREDENTIALS` | Login do dashboard errado/cacheado | Use `admin / ValorizaAeWaha2026` e abra `/dashboard/` |
-| `401 Unauthorized` no dashboard | Worker sem API key | Configure API key `valoriza-waha-key` |
+| `ERR_INVALID_AUTH_CREDENTIALS` | Login do dashboard errado/cacheado | Use o usuário e a senha exibidos pelo `start.ps1` e abra `/dashboard/` |
+| `401 Unauthorized` no dashboard | Worker sem API key | Configure API key `$env:VALORIZA_WHATSAPP_API_KEY` |
 | Worker vermelho | Worker duplicado ou sem chave | Apague o vermelho e mantenha o verde |
 | `Session 'default' already exists` | Sessão já criada | Use a sessão existente |
 | Mensagem para “Você” não responde | Self-chat não é teste confiável | Teste com outro número quando possível |
@@ -648,16 +638,15 @@ Painel local:
 
 ```text
 http://localhost:15672
-guest / guest
-```
+As credenciais locais são definidas por variável de ambiente. O `start.ps1` configura valores de desenvolvimento quando elas não existem.
 
 Configuração principal:
 
 ```properties
 valoriza.rabbitmq.host=localhost
 valoriza.rabbitmq.port=5672
-valoriza.rabbitmq.username=guest
-valoriza.rabbitmq.password=guest
+valoriza.rabbitmq.username=${VALORIZA_RABBITMQ_USERNAME:valoriza}
+valoriza.rabbitmq.password=${VALORIZA_RABBITMQ_PASSWORD:valoriza-local-rabbitmq}
 valoriza.rabbitmq.queue=valoriza-ae.eventos
 ```
 
@@ -707,30 +696,241 @@ integracoes.viacep.base-url=https://viacep.com.br/ws
 
 ## ✉️ EmailJS
 
-O EmailJS envia notificações reais e recuperação de senha.
+O EmailJS envia os avisos reais do Valoriza Aê: moedas recebidas, moedas enviadas, cupons gerados, validações, alterações de status e recuperação de senha.
 
-Template genérico:
+O projeto usa **um template genérico** para todos os perfis. O backend muda os textos e os dados enviados para que o aluno, o professor ou a empresa recebam apenas o conteúdo que faz sentido para a ação realizada.
 
-```text
-docs/readme/emailjs-template-aluno.html
-```
-
-Campos importantes no template:
+Variáveis usadas pelo template:
 
 ```text
-{{to_email}}
-{{subject}}
-{{title}}
-{{message}}
+{{preheader}}
+{{app_name}}
+{{email_tag}}
+{{audience}}
+{{headline}}
+{{intro_text}}
+{{highlight_label}}
+{{highlight_value}}
+{{summary_text}}
+{{status_label}}
+{{status_value}}
 {{button_url}}
-{{button_label}}
+{{action_label}}
+{{footer_note}}
+{{support_note}}
+{{to_email}}
 ```
+
+<details>
+<summary>📧 Ver template HTML completo do EmailJS</summary>
+
+```html
+<div style="margin:0;padding:0;background:#eef5f1;font-family:Arial,Helvetica,sans-serif;color:#15211d;">
+  <div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;">
+    {{preheader}}
+  </div>
+
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;background:#eef5f1;margin:0;padding:0;">
+    <tr>
+      <td align="center" style="padding:24px 12px;">
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="width:100%;max-width:560px;border-collapse:collapse;">
+          <tr>
+            <td style="background:#ffffff;border:1px solid #d7e6df;border-radius:18px;box-shadow:0 12px 34px rgba(21,33,29,.10);overflow:hidden;">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;">
+                <tr>
+                  <td style="padding:18px 22px;border-bottom:1px solid #e2ece7;">
+                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;">
+                      <tr>
+                        <td style="vertical-align:middle;">
+                          <table role="presentation" cellspacing="0" cellpadding="0" style="border-collapse:collapse;">
+                            <tr>
+                              <td style="vertical-align:middle;width:46px;">
+                                <div style="width:42px;height:42px;border-radius:12px;background:#f7fbf9;border:1px solid #d7e6df;position:relative;overflow:hidden;">
+                                  <div style="height:15px;background:#063a5f;margin:7px 6px 0;border-radius:4px 4px 2px 2px;"></div>
+                                  <div style="width:25px;height:25px;border-radius:999px;background:#ffd23f;border:3px solid #ffffff;margin:-3px auto 0;"></div>
+                                  <div style="position:absolute;left:0;right:0;bottom:7px;text-align:center;font-size:9px;line-height:1;color:#063a5f;font-weight:900;">VA</div>
+                                </div>
+                              </td>
+                              <td style="vertical-align:middle;padding-left:10px;">
+                                <div style="font-size:18px;line-height:1.1;font-weight:900;color:#15211d;">
+                                  {{app_name}}
+                                </div>
+                                <div style="font-size:11px;line-height:1.4;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#1f7a5f;">
+                                  {{email_tag}}
+                                </div>
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                        <td align="right" style="vertical-align:middle;">
+                          <span style="display:inline-block;background:#fff3c9;color:#725018;border:1px solid #f2d493;border-radius:999px;padding:7px 10px;font-size:12px;font-weight:800;">
+                            {{audience}}
+                          </span>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td style="background:#173f34;padding:22px;">
+                    <h1 style="margin:0;font-size:24px;line-height:1.18;color:#ffffff;font-weight:900;">
+                      {{headline}}
+                    </h1>
+                    <p style="margin:9px 0 0;font-size:14px;line-height:1.5;color:#d9ebe4;">
+                      {{intro_text}}
+                    </p>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td style="padding:22px;">
+                    <div style="background:#fff8e8;border:1px solid #f2d493;border-radius:14px;padding:16px;margin:0 0 14px;text-align:center;">
+                      <div style="font-size:11px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:#8a5a12;margin-bottom:6px;">
+                        {{highlight_label}}
+                      </div>
+                      <div style="font-size:32px;line-height:1;color:#15211d;font-weight:900;">
+                        {{highlight_value}}
+                      </div>
+                    </div>
+
+                    <p style="margin:0 0 14px;font-size:15px;line-height:1.55;color:#283832;font-weight:700;">
+                      {{summary_text}}
+                    </p>
+
+                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;margin:0 0 16px;">
+                      <tr>
+                        <td style="vertical-align:top;background:#f7fbf9;border:1px solid #d7e6df;border-radius:12px;padding:12px;">
+                          <div style="font-size:11px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:#1f7a5f;margin-bottom:5px;">
+                            {{status_label}}
+                          </div>
+                          <div style="font-size:14px;line-height:1.35;color:#15211d;font-weight:800;">
+                            {{status_value}}
+                          </div>
+                        </td>
+                      </tr>
+                    </table>
+
+                    <table role="presentation" cellspacing="0" cellpadding="0" style="border-collapse:collapse;margin:0 0 14px;">
+                      <tr>
+                        <td style="border-radius:10px;background:#1f7a5f;">
+                          <a href="{{button_url}}" target="_blank" rel="noopener noreferrer" style="display:inline-block;padding:13px 18px;color:#ffffff;text-decoration:none;font-size:14px;font-weight:900;border-radius:10px;">
+                            {{action_label}}
+                          </a>
+                        </td>
+                      </tr>
+                    </table>
+
+                    <div style="background:#fff8e8;border:1px solid #f2d493;border-radius:12px;padding:12px;margin:0 0 10px;">
+                      <p style="margin:0;font-size:13px;line-height:1.5;color:#725018;font-weight:700;">
+                        {{footer_note}}
+                      </p>
+                    </div>
+
+                    <p style="margin:0;font-size:12px;line-height:1.5;color:#7a8782;">
+                      {{support_note}}
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:14px 4px 0;text-align:center;font-size:12px;line-height:1.5;color:#7a8782;">
+              Enviado para {{to_email}} pelo {{app_name}}.
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</div>
+```
+
+</details>
 
 Se a API recusar envio fora do navegador, habilite no painel do EmailJS:
 
 ```text
 Account > Security > API access from non-browser environments
 ```
+
+---
+
+<a id="historias-expandidas"></a>
+
+## 📋 Histórias De Usuário E Requisitos Expandidos
+
+Esta seção consolida as histórias e requisitos expandidos do Valoriza Aê. A ideia é transformar reconhecimento acadêmico em um ciclo completo: o professor reconhece uma entrega, o aluno acompanha o saldo, resgata uma vantagem real e a empresa confirma o uso do cupom.
+
+### 🎓 Aluno
+
+- Como aluno, quero visualizar meu saldo, moedas recebidas, moedas usadas e cupons validados para entender meu progresso no sistema.
+- Como aluno, quero filtrar vantagens por disponibilidade para encontrar rapidamente benefícios que posso resgatar.
+- Como aluno, quero ver quanto falta para uma vantagem para planejar meus próximos resgates.
+- Como aluno, quero receber um cupom ao resgatar uma vantagem para apresentar o código ou QR Code ao parceiro.
+- Como aluno, quero acompanhar se meu cupom está pendente, validado, pausado ou cancelado para saber se o benefício ainda pode ser usado.
+- Como aluno, quero recuperar minha senha por e-mail para voltar ao sistema sem depender de suporte manual.
+
+### 👩‍🏫 Professor
+
+- Como professor, quero enviar moedas com valor e justificativa obrigatória para reconhecer méritos de forma transparente.
+- Como professor, quero usar valores rápidos e modelos de justificativa para registrar reconhecimentos com menos atrito.
+- Como professor, quero buscar alunos por nome, e-mail ou curso para selecionar o destino correto.
+- Como professor, quero visualizar saldos e histórico dos alunos para acompanhar a evolução da turma.
+- Como professor, quero manter um extrato dos meus envios para auditar minha cota semestral.
+- Como professor, quero receber confirmação por e-mail e WhatsApp quando um envio for registrado.
+
+### 🏪 Empresa Parceira
+
+- Como empresa parceira, quero cadastrar vantagens com imagem, descrição, custo e status para manter meu catálogo atualizado.
+- Como empresa parceira, quero visualizar um preview da vantagem antes de salvar para evitar erros de publicação.
+- Como empresa parceira, quero consultar e validar cupons pelo código para confirmar que a troca presencial aconteceu.
+- Como empresa parceira, quero acompanhar cupons pendentes e validados para controlar atendimentos realizados.
+- Como empresa parceira, quero pausar uma vantagem sem apagar histórico para impedir novos resgates sem perder rastreabilidade.
+- Como empresa parceira, quero excluir vantagens sem resgate para manter o catálogo limpo.
+
+### ✅ Requisitos Funcionais Consolidados
+
+- RF-01: O sistema deve identificar o produto como Valoriza Aê nas telas, e-mails, WhatsApp e documentação.
+- RF-02: O sistema deve permitir cadastro de alunos com nome, e-mail, CPF, RG, endereço, instituição e curso.
+- RF-03: O sistema deve manter instituições e cursos pré-cadastrados para seleção no cadastro do aluno.
+- RF-04: O sistema deve manter professores pré-cadastrados com nome, CPF, departamento e instituição vinculada.
+- RF-05: O professor deve enviar moedas ao aluno com justificativa obrigatória e desconto da cota semestral.
+- RF-06: O aluno deve consultar saldo, extrato, notificações, catálogo de vantagens e cupons.
+- RF-07: O aluno deve resgatar vantagens disponíveis usando moedas.
+- RF-08: O sistema deve gerar cupom único e QR Code para cada resgate de vantagem.
+- RF-09: A empresa deve validar o cupom antes de concluir o atendimento do benefício.
+- RF-10: O sistema deve impedir compra duplicada do mesmo benefício quando o aluno já possui cupom pendente ou ativo.
+- RF-11: O extrato deve mostrar status claro para créditos, resgates, cupons pendentes e cupons validados.
+- RF-12: Aluno, professor e empresa devem filtrar extratos e notificações por dia, semana, mês, ano ou todos os registros.
+- RF-13: O sistema deve consultar ViaCEP para preencher endereço pelo CEP.
+- RF-14: O sistema deve enviar e-mails reais pelo EmailJS para notificações operacionais e recuperação de senha.
+- RF-15: O sistema deve publicar eventos em RabbitMQ para manter rastreabilidade de envios, cupons, validações e alterações de status.
+- RF-16: O sistema deve integrar WhatsApp via WAHA para atendimento guiado, login por perfil e consulta das principais funções.
+- RF-17: O projeto deve manter diagramas de casos de uso, componentes, dados, sequência, comunicação e implantação para as Releases 2 e 3.
+
+### 🧭 Regras De Negócio
+
+- Apenas alunos podem resgatar vantagens.
+- Apenas professores podem enviar moedas.
+- Apenas a empresa dona da vantagem pode validar o cupom daquele resgate.
+- O resgate desconta moedas do aluno imediatamente.
+- A validação do cupom não altera saldo; ela confirma a entrega do benefício.
+- Cupom validado não pode ser validado novamente.
+- Cupom de vantagem pausada precisa aparecer com status claro para o aluno.
+- Professor precisa informar justificativa para todo envio de moedas.
+- A cota semestral do professor continua acumulável quando não usada.
+
+### 🔁 Fluxo Principal
+
+1. Professor recebe ou acumula cota semestral.
+2. Professor envia moedas ao aluno com justificativa.
+3. Aluno recebe notificação e acompanha saldo, extrato e catálogo.
+4. Aluno resgata uma vantagem e recebe cupom com QR Code.
+5. Empresa consulta o código do cupom.
+6. Empresa valida o cupom e o sistema registra a conclusão no histórico.
 
 ---
 
@@ -757,7 +957,7 @@ $env:VALORIZA_APP_PUBLIC_URL="http://localhost:8080"
 $env:VALORIZA_WHATSAPP_ENABLED="true"
 $env:VALORIZA_WHATSAPP_ENDPOINT="http://localhost:3000"
 $env:VALORIZA_WHATSAPP_SESSION="default"
-$env:VALORIZA_WHATSAPP_API_KEY="valoriza-waha-key"
+$env:VALORIZA_WHATSAPP_API_KEY="<defina-uma-chave-forte-ou-deixe-o-start.ps1-gerar>"
 $env:VALORIZA_WHATSAPP_FAIL_ON_ERROR="false"
 $env:VALORIZA_EMAILJS_ENABLED="false"
 ```
@@ -802,15 +1002,10 @@ mvn package
 
 ---
 
-## 📚 Documentação Complementar
+## 📚 Artefatos Complementares
 
 ```text
-docs/readme/historias-usuario-expandidas.md
-docs/readme/emailjs-template-aluno.html
-docs/readme/frontend-react.md
-docs/readme/release-2-3-rastreabilidade.md
 Artefatos/diagrama-er-acesso-dados.md
-Artefatos/diagrama-er-acesso-dados-release-1.md
 Artefatos/DigramaDeCasosDeUso/DiagramaDeCasosDeUso-release-2-3.md
 Artefatos/DigramaDeComponentes/DiagramaDeComponentes-release-2-3.md
 Artefatos/DiagramaDeSequencia/DiagramaDeSequencia-release-2-3.md

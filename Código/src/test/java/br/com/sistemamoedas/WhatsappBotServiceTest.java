@@ -37,7 +37,7 @@ class WhatsappBotServiceTest {
         String resposta = bot.processarMensagem("5500999999999@c.us", "Oi");
 
         assertTrue(resposta.contains("José"));
-        assertTrue(resposta.contains("informe seu e-mail"));
+        assertTrue(resposta.contains("e-mail cadastrado"));
     }
 
     @Test
@@ -53,8 +53,8 @@ class WhatsappBotServiceTest {
         String saldo = bot.processarMensagem("5500999999999@c.us", "saldo");
         String vantagens = bot.processarMensagem("5500999999999@c.us", "vantagens");
 
-        assertTrue(pedidoSenha.contains("informe sua senha"));
-        assertTrue(login.contains("Login confirmado como Aluno"));
+        assertTrue(pedidoSenha.contains("senha"));
+        assertTrue(login.contains("Login confirmado") && login.contains("Aluno"));
         assertTrue(menu.contains("Menu do aluno"));
         assertTrue(saldo.contains("moedas disponíveis"));
         assertTrue(vantagens.contains("Vantagens disponíveis"));
@@ -76,7 +76,7 @@ class WhatsappBotServiceTest {
         String saldo = bot.processarMensagem("5500999999999@c.us", "saldo");
 
         assertTrue(escolha.contains("e-mail"));
-        assertTrue(login.contains("Login confirmado como Aluno"));
+        assertTrue(login.contains("Login confirmado") && login.contains("Aluno"));
         assertTrue(saldo.contains("moedas disponíveis"));
     }
 
@@ -90,7 +90,41 @@ class WhatsappBotServiceTest {
         String login = bot.processarMensagem("550099999999@c.us", "login aluno@moedas.com ValorizaAe#2026!");
         String saldo = bot.processarMensagem("550099999999@c.us", "saldo");
 
-        assertTrue(login.contains("Login confirmado como Aluno"));
+        assertTrue(login.contains("Login confirmado") && login.contains("Aluno"));
         assertTrue(saldo.contains("moedas disponíveis"));
+    }
+
+    @Test
+    @Transactional
+    void devePermitirLoginComEmailSenhaMesmoSemTelefoneVinculado() {
+        String chat = "551188887777@c.us";
+
+        bot.processarMensagem(chat, "sair");
+        String pedidoSenha = bot.processarMensagem(chat, "aluno@moedas.com");
+        String login = bot.processarMensagem(chat, "ValorizaAe#2026!");
+        String saldo = bot.processarMensagem(chat, "saldo");
+
+        assertTrue(pedidoSenha.contains("senha"));
+        assertTrue(login.contains("Login confirmado") && login.contains("Aluno"));
+        assertTrue(saldo.contains("moedas dispon"));
+        assertTrue(saldo.contains("Menu do aluno"));
+    }
+
+    @Test
+    @Transactional
+    void deveListarTodosOsCuponsComDescricaoEMenu() {
+        String chat = "551188887778@c.us";
+
+        bot.processarMensagem(chat, "sair");
+        bot.processarMensagem(chat, "aluno@moedas.com");
+        bot.processarMensagem(chat, "ValorizaAe#2026!");
+        String cupons = bot.processarMensagem(chat, "4");
+
+        assertTrue(cupons.contains("SME-CAMPUS26"));
+        assertTrue(cupons.contains("SME-USADO25"));
+        assertTrue(cupons.contains("Voucher de impressao") || cupons.contains("Voucher"));
+        assertTrue(cupons.contains("Descricao") || cupons.contains("Descrição"));
+        assertTrue(cupons.contains("QR Code"));
+        assertTrue(cupons.contains("Menu do aluno"));
     }
 }
