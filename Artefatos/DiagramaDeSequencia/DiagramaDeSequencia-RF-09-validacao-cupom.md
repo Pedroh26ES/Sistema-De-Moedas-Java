@@ -17,6 +17,7 @@ sequenceDiagram
 
     Note over Empresa,Fila: 1. Validacao de cupom pela empresa
     Empresa->>Interface: 1.1 informarCodigoCupom(codigo)
+    activate Interface
     Interface->>Sistema: 1.2 consultarCupom(empresa, codigo)
     activate Sistema
     Sistema->>DB: 1.3 buscarCupomDaEmpresa(codigo, empresa)
@@ -29,7 +30,13 @@ sequenceDiagram
         Sistema->>DB: 1.8 marcarCupomValidado(codigo)
         DB-->>Sistema: 1.9 validacaoSalva
         Sistema->>Notificacao: 1.10 notificarAlunoCupomValidado()
+        activate Notificacao
+        Notificacao-->>Sistema: 1.10.1 notificacaoRegistrada
+        deactivate Notificacao
         Sistema->>Fila: 1.11 publicarCUPOM_VALIDADO()
+        activate Fila
+        Fila-->>Sistema: 1.11.1 eventoPublicado
+        deactivate Fila
         Sistema-->>Interface: 1.12 validacaoConcluida
         Interface-->>Empresa: 1.13 atendimentoConfirmado
     else Cupom invalido
@@ -38,5 +45,6 @@ sequenceDiagram
     end
     deactivate DB
     deactivate Sistema
+    deactivate Interface
 ```
 

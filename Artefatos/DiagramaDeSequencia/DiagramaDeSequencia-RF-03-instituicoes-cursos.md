@@ -15,6 +15,7 @@ sequenceDiagram
 
     Note over Aluno,DB: 1. Selecao de instituicao e curso pre-cadastrados
     Aluno->>Interface: 1.1 abrirFormularioCadastro()
+    activate Interface
     Interface->>Sistema: 1.2 listarInstituicoes()
     activate Sistema
     Sistema->>DB: 1.3 consultarInstituicoesPreCadastradas()
@@ -30,5 +31,6 @@ sequenceDiagram
     Sistema-->>Interface: 1.11 opcoesCurso
     deactivate Sistema
     Interface-->>Aluno: 1.12 exibirCursosPermitidos
+    deactivate Interface
 ```
 

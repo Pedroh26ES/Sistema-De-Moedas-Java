@@ -16,14 +16,20 @@ sequenceDiagram
 
     Note over Usuario,Docs: 1. Identificacao do produto nas interfaces e comunicacoes
     Usuario->>Interface: 1.1 acessarSistema()
+    activate Interface
     Interface->>Sistema: 1.2 carregarIdentidadeVisual()
     activate Sistema
     Sistema-->>Interface: 1.3 nomeLogoTextosDoProduto
-    deactivate Sistema
     Interface-->>Usuario: 1.4 exibirValorizaAe()
+    deactivate Interface
     Sistema->>Notificacao: 1.5 montarMensagemComNomeDoProduto(evento)
+    activate Notificacao
     Notificacao-->>Usuario: 1.6 emailOuWhatsAppComValorizaAe
+    deactivate Notificacao
     Sistema->>Docs: 1.7 manterNomeNosArtefatos()
+    activate Docs
     Docs-->>Sistema: 1.8 documentacaoAtualizada
+    deactivate Docs
+    deactivate Sistema
 ```
 

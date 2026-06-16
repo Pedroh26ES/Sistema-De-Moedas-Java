@@ -16,6 +16,7 @@ sequenceDiagram
 
     Note over Usuario,Notificacao: 1. Atendimento guiado via WhatsApp
     Usuario->>WAHA: 1.1 enviarMensagemWhatsApp(texto)
+    activate WAHA
     WAHA->>Sistema: 1.2 webhookMensagem(chatId, texto)
     activate Sistema
     Sistema->>DB: 1.3 buscarSessaoUsuarioOuTelefone(chatId)
@@ -31,9 +32,12 @@ sequenceDiagram
         WAHA-->>Usuario: 1.9 respostaWhatsApp
     end
     opt Notificacao operacional por WhatsApp
+        activate Notificacao
         Notificacao->>WAHA: 1.10 enviarMensagem(chatId, conteudo)
         WAHA-->>Usuario: 1.11 avisoRecebido
+        deactivate Notificacao
     end
     deactivate Sistema
+    deactivate WAHA
 ```
 

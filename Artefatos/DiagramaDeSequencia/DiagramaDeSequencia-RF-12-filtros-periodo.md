@@ -15,6 +15,7 @@ sequenceDiagram
 
     Note over Usuario,DB: 1. Filtro por periodo em extratos e notificacoes
     Usuario->>Interface: 1.1 selecionarFiltro(dia, semana, mes, ano, todos)
+    activate Interface
     Interface->>Sistema: 1.2 aplicarFiltroPeriodo(usuario, filtro)
     activate Sistema
     Sistema->>DB: 1.3 consultarRegistrosPorPeriodo(usuario, filtro)
@@ -29,5 +30,6 @@ sequenceDiagram
         Interface-->>Usuario: 1.8 exibirMensagemSemRegistros
     end
     deactivate Sistema
+    deactivate Interface
 ```
 

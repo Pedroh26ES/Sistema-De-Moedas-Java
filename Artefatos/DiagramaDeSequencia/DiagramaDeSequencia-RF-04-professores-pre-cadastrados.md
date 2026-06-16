@@ -14,6 +14,7 @@ sequenceDiagram
     participant Interface
 
     Note over Sistema,DB: 1. Carga e manutencao de professores pre-cadastrados
+    activate Sistema
     Sistema->>DB: 1.1 consultarProfessoresExistentes()
     activate DB
     DB-->>Sistema: 1.2 professoresAtuais
@@ -24,13 +25,18 @@ sequenceDiagram
         DB-->>Sistema: 1.5 cadastroMantido
     end
     deactivate DB
+    deactivate Sistema
     Professor->>Interface: 1.6 entrarComEmailInstitucional()
+    activate Interface
     Interface->>Sistema: 1.7 autenticarProfessor(email, senha)
+    activate Sistema
     Sistema->>DB: 1.8 buscarProfessorPorEmail(email)
     activate DB
     DB-->>Sistema: 1.9 professorComInstituicao
     deactivate DB
     Sistema-->>Interface: 1.10 acessoProfessor
+    deactivate Sistema
     Interface-->>Professor: 1.11 painelProfessor
+    deactivate Interface
 ```
 

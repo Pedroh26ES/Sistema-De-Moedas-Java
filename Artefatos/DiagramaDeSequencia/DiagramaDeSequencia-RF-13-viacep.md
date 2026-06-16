@@ -15,6 +15,7 @@ sequenceDiagram
 
     Note over Usuario,ViaCEP: 1. Preenchimento automatico de endereco por CEP
     Usuario->>Interface: 1.1 informarCep(cep)
+    activate Interface
     Interface->>Sistema: 1.2 consultarEnderecoPorCep(cep)
     activate Sistema
     Sistema->>ViaCEP: 1.3 buscarEndereco(cep)
@@ -29,5 +30,6 @@ sequenceDiagram
         Interface-->>Usuario: 1.8 solicitarCorrecaoCep
     end
     deactivate Sistema
+    deactivate Interface
 ```
 

@@ -15,6 +15,7 @@ sequenceDiagram
 
     Note over Aluno,DB: 1. Bloqueio de resgate duplicado
     Aluno->>Interface: 1.1 tentarResgatarMesmoBeneficio(vantagem)
+    activate Interface
     Interface->>Sistema: 1.2 verificarDuplicidade(aluno, vantagem)
     activate Sistema
     Sistema->>DB: 1.3 buscarCupomPendenteOuAtivo(aluno, vantagem)
@@ -29,5 +30,6 @@ sequenceDiagram
     end
     deactivate DB
     deactivate Sistema
+    deactivate Interface
 ```
 

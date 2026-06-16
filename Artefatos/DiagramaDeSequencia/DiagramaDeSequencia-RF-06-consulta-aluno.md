@@ -15,6 +15,7 @@ sequenceDiagram
 
     Note over Aluno,DB: 1. Consulta do painel do aluno
     Aluno->>Interface: 1.1 abrirPainelAluno()
+    activate Interface
     Interface->>Sistema: 1.2 carregarDadosAluno(aluno)
     activate Sistema
     Sistema->>DB: 1.3 buscarSaldoExtratoNotificacoesCatalogoCupons(aluno)
@@ -29,5 +30,6 @@ sequenceDiagram
         Interface-->>Aluno: 1.8 exibirEstadoInicial
     end
     deactivate Sistema
+    deactivate Interface
 ```
 

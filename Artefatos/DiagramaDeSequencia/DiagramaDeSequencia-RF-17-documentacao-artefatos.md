@@ -15,6 +15,7 @@ sequenceDiagram
 
     Note over Equipe,GitHub: 1. Manutencao dos artefatos das Releases 2 e 3
     Equipe->>Repositorio: 1.1 atualizarArtefato(tipoDiagrama)
+    activate Repositorio
     Repositorio->>Artefatos: 1.2 salvarDiagrama(casos, componentes, dados, sequencia, comunicacao, implantacao)
     activate Artefatos
     Artefatos-->>Repositorio: 1.3 artefatoAtualizado
@@ -28,5 +29,6 @@ sequenceDiagram
     else Falha de renderizacao
         Repositorio-->>Equipe: 1.7 revisarSintaxeOuDividirArquivo
     end
+    deactivate Repositorio
 ```
 

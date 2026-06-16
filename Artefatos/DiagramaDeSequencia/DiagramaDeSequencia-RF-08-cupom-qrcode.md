@@ -16,6 +16,7 @@ sequenceDiagram
 
     Note over Aluno,QR: 1. Geracao de cupom unico e QR Code
     Aluno->>Interface: 1.1 concluirResgate(vantagem)
+    activate Interface
     Interface->>Sistema: 1.2 gerarCupomDoResgate(aluno, vantagem)
     activate Sistema
     Sistema->>Sistema: 1.3 criarCodigoUnicoCupom()
@@ -30,5 +31,6 @@ sequenceDiagram
     Sistema-->>Interface: 1.8 codigoEQRCode
     deactivate Sistema
     Interface-->>Aluno: 1.9 exibirCupomUnicoEQRCode
+    deactivate Interface
 ```
 

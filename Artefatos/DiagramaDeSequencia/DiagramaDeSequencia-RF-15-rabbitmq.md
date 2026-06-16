@@ -13,6 +13,7 @@ sequenceDiagram
     participant DB as Banco de Dados
 
     Note over Servico,DB: 1. Publicacao de evento operacional
+    activate Servico
     Servico->>Fila: 1.1 publicarEvento(tipo, dados)
     activate Fila
     alt RabbitMQ disponivel
@@ -25,5 +26,6 @@ sequenceDiagram
         deactivate DB
     end
     deactivate Fila
+    deactivate Servico
 ```
 

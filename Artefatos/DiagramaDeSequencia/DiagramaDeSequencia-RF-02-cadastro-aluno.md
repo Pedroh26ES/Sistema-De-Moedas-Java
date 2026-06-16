@@ -15,6 +15,7 @@ sequenceDiagram
 
     Note over Aluno,DB: 1. Cadastro de aluno
     Aluno->>Interface: 1.1 preencherDados(nome, email, cpf, rg, endereco, instituicao, curso)
+    activate Interface
     Interface->>Sistema: 1.2 cadastrarAluno(dados)
     activate Sistema
     Note right of Sistema: Valida dados obrigatorios, documentos e vinculos academicos
@@ -32,5 +33,6 @@ sequenceDiagram
     end
     deactivate DB
     deactivate Sistema
+    deactivate Interface
 ```
 

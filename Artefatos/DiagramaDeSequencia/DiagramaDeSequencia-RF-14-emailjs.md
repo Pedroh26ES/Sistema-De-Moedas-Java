@@ -15,6 +15,7 @@ sequenceDiagram
     actor Usuario
 
     Note over Servico,EmailJS: 1. Envio de email real e registro de notificacao
+    activate Servico
     Servico->>Notificacao: 1.1 enviarEmail(destinatario, assunto, conteudo)
     activate Notificacao
     Notificacao->>DB: 1.2 registrarNotificacao(destinatario, assunto)
@@ -31,5 +32,6 @@ sequenceDiagram
         Notificacao-->>Servico: 1.7 apenasRegistroNoPainel
     end
     deactivate Notificacao
+    deactivate Servico
 ```
 

@@ -15,6 +15,7 @@ sequenceDiagram
 
     Note over Usuario,DB: 1. Exibicao de status claro no extrato
     Usuario->>Interface: 1.1 abrirExtrato(perfil)
+    activate Interface
     Interface->>Sistema: 1.2 carregarExtrato(perfil, usuario)
     activate Sistema
     Sistema->>DB: 1.3 buscarCreditosResgatesECupons(usuario)
@@ -27,5 +28,6 @@ sequenceDiagram
     Sistema-->>Interface: 1.6 extratoComStatus
     deactivate Sistema
     Interface-->>Usuario: 1.7 exibirStatusClaramente
+    deactivate Interface
 ```
 

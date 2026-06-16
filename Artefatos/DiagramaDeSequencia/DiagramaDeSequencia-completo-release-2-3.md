@@ -23,6 +23,7 @@ sequenceDiagram
 
     Note over Aluno,ViaCEP: 1. Conta, cadastro e seguranca
     Aluno->>Interface: 1.1 solicitarCadastroAluno(dados, cep)
+    activate Interface
     Interface->>Sistema: 1.2 carregarInstituicoesECursos()
     activate Sistema
     Sistema->>DB: 1.3 consultarInstituicoesECursos()
@@ -51,9 +52,11 @@ sequenceDiagram
     end
     deactivate DB
     deactivate Sistema
+    deactivate Interface
 
     Note over Professor,Fila: 2. Envio de moedas pelo professor
     Professor->>Interface: 2.1 enviarMoedas(aluno, valor, motivo)
+    activate Interface
     Interface->>Sistema: 2.2 registrarEnvioMoedas(professor, aluno, valor, motivo)
     activate Sistema
     Note right of Sistema: Valida professor, aluno, saldo da cota e justificativa
@@ -68,15 +71,23 @@ sequenceDiagram
         Sistema->>DB: 2.8 registrarTransacaoEnvio()
         DB-->>Sistema: 2.9 transacaoRegistrada
         Sistema->>Notificacao: 2.10 notificarAlunoEProfessor()
+        activate Notificacao
+        Notificacao-->>Sistema: 2.10.1 notificacoesRegistradas
+        deactivate Notificacao
         Sistema->>Fila: 2.11 publicarMOEDAS_ENVIADAS()
+        activate Fila
+        Fila-->>Sistema: 2.11.1 eventoPublicado
+        deactivate Fila
         Sistema-->>Interface: 2.12 envioConfirmado
         Interface-->>Professor: 2.13 cotaExtratoAtualizados
     end
     deactivate DB
     deactivate Sistema
+    deactivate Interface
 
     Note over Aluno,Fila: 3. Resgate de vantagem pelo aluno
     Aluno->>Interface: 3.1 solicitarResgate(vantagem)
+    activate Interface
     Interface->>Sistema: 3.2 resgatarVantagem(aluno, vantagem)
     activate Sistema
     Note right of Sistema: Valida saldo, vantagem ativa e compra duplicada
@@ -94,15 +105,23 @@ sequenceDiagram
         QR-->>Sistema: 3.10 qrCodeGerado
         deactivate QR
         Sistema->>Notificacao: 3.11 enviarCupomAlunoParceiro()
+        activate Notificacao
+        Notificacao-->>Sistema: 3.11.1 cupomEnviado
+        deactivate Notificacao
         Sistema->>Fila: 3.12 publicarCUPOM_GERADO()
+        activate Fila
+        Fila-->>Sistema: 3.12.1 eventoPublicado
+        deactivate Fila
         Sistema-->>Interface: 3.13 codigoStatusQrCode
         Interface-->>Aluno: 3.14 cupomPendenteExibido
     end
     deactivate DB
     deactivate Sistema
+    deactivate Interface
 
     Note over Empresa,Fila: 4. Gestao de vantagem e validacao de cupom
     Empresa->>Interface: 4.1 consultarCupom(codigo)
+    activate Interface
     Interface->>Sistema: 4.2 buscarCupomDaEmpresa(empresa, codigo)
     activate Sistema
     Sistema->>DB: 4.3 consultarCupomEVantagem(codigo)
@@ -115,7 +134,13 @@ sequenceDiagram
         Sistema->>DB: 4.8 marcarCupomValidado(codigo)
         DB-->>Sistema: 4.9 validacaoSalva
         Sistema->>Notificacao: 4.10 notificarAlunoCupomValidado()
+        activate Notificacao
+        Notificacao-->>Sistema: 4.10.1 notificacaoRegistrada
+        deactivate Notificacao
         Sistema->>Fila: 4.11 publicarCUPOM_VALIDADO()
+        activate Fila
+        Fila-->>Sistema: 4.11.1 eventoPublicado
+        deactivate Fila
         Sistema-->>Interface: 4.12 validacaoConcluida
         Interface-->>Empresa: 4.13 atendimentoConfirmado
     else Cupom usado, pausado ou de outra empresa
@@ -124,9 +149,11 @@ sequenceDiagram
     end
     deactivate DB
     deactivate Sistema
+    deactivate Interface
 
     Note over Empresa,Fila: 5. Alteracao de vantagem e notificacoes automaticas
     Empresa->>Interface: 5.1 alterarStatusVantagem(vantagem, status)
+    activate Interface
     Interface->>Sistema: 5.2 pausarOuReativarVantagem(empresa, vantagem, status)
     activate Sistema
     Sistema->>DB: 5.3 validarVantagemEConsultarCuponsPendentes()
@@ -137,18 +164,31 @@ sequenceDiagram
     deactivate DB
     loop Para cada aluno com cupom pendente
         Sistema->>Notificacao: 5.7 avisarAlunoAfetado(aluno, cupom, status)
+        activate Notificacao
+        Notificacao-->>Sistema: 5.7.1 avisoRegistrado
+        deactivate Notificacao
     end
     alt Vantagem pausada
         Sistema->>Fila: 5.8 publicarCUPOM_DESATIVADO()
+        activate Fila
+        Fila-->>Sistema: 5.8.1 eventoPublicado
+        deactivate Fila
     else Vantagem reativada
         Sistema->>Fila: 5.9 publicarCUPOM_REATIVADO()
+        activate Fila
+        Fila-->>Sistema: 5.9.1 eventoPublicado
+        deactivate Fila
     end
     opt RabbitMQ indisponivel em desenvolvimento
         Sistema->>DB: 5.10 persistirEventoLocal()
+        activate DB
+        DB-->>Sistema: 5.10.1 eventoLocalRegistrado
+        deactivate DB
     end
     Sistema-->>Interface: 5.11 catalogoAtualizado
     deactivate Sistema
     Interface-->>Empresa: 5.12 novoStatusExibido
+    deactivate Interface
 ```
 
 ## Observacao
