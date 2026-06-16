@@ -3,6 +3,36 @@ $ErrorActionPreference = "Stop"
 $projectDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 Set-Location $projectDir
 
+function Import-LocalEnv {
+    param([string]$Path)
+
+    if (-not (Test-Path $Path)) {
+        return
+    }
+
+    foreach ($rawLine in Get-Content $Path) {
+        $line = $rawLine.Trim()
+        if ($line.Length -eq 0 -or $line.StartsWith("#")) {
+            continue
+        }
+
+        $separator = $line.IndexOf("=")
+        if ($separator -le 0) {
+            continue
+        }
+
+        $name = $line.Substring(0, $separator).Trim()
+        $value = $line.Substring($separator + 1).Trim()
+        if (($value.StartsWith('"') -and $value.EndsWith('"')) -or ($value.StartsWith("'") -and $value.EndsWith("'"))) {
+            $value = $value.Substring(1, $value.Length - 2)
+        }
+
+        Set-Item -Path "Env:$name" -Value $value
+    }
+}
+
+Import-LocalEnv "$projectDir\.env.local"
+
 function New-LocalSecret {
     param([string]$Prefix)
     return "$Prefix-$([guid]::NewGuid().ToString("N").Substring(0, 18))"
