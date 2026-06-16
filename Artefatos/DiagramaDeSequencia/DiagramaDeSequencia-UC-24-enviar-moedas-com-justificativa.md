@@ -1,8 +1,8 @@
-# DiagramaDeSequencia - Professor - UC-24 a UC-26
+﻿# DiagramaDeSequencia - UC-24 - Enviar moedas com justificativa
 
 Artefato das Releases 2 e 3 do Valoriza Ae.
 
-Modelo baseado no gabarito: participantes fixos, blocos numerados, mensagens numeradas, retornos tracejados, notas de regra e fragmentos `alt`/`opt`.
+Modelo baseado no gabarito: participantes fixos, bloco numerado, mensagens numeradas, retornos tracejados e fragmentos UML quando necessario.
 
 [Voltar ao indice geral](DiagramaDeSequencia-release-2-3.md) | [Voltar ao grupo](DiagramaDeSequencia-03-professor.md)
 
@@ -36,31 +36,5 @@ sequenceDiagram
     end
     deactivate DB
     deactivate Sistema
-
-    Note over Professor,DB: 2. Validar saldo e motivo do envio
-    Professor->>Interface: 2.1 confirmarDadosDoEnvio()
-    Interface->>Sistema: 2.2 validarSaldoEMotivo(professor, valor, motivo)
-    activate Sistema
-    Note right of Sistema: Motivo deve existir e professor precisa ter cota suficiente
-    Sistema->>DB: 2.3 buscarSaldoDoProfessor(professor)
-    activate DB
-    DB-->>Sistema: 2.4 saldoAtual
-    deactivate DB
-    alt Valor positivo, saldo suficiente e motivo informado
-        Sistema-->>Interface: 2.5 validacaoAprovada
-        Interface-->>Professor: 2.6 envioPodeSerConfirmado
-    else Regra invalida
-        Sistema-->>Interface: 2.7 validacaoReprovada
-        Interface-->>Professor: 2.8 mensagemDaRegraViolada
-    end
-    deactivate Sistema
-
-    Note over Sistema,Notificacao: 3. Receber confirmacao do envio
-    Sistema->>Notificacao: 3.1 enviarConfirmacaoProfessor(dadosEnvio)
-    activate Notificacao
-    Notificacao-->>Sistema: 3.2 emailRegistradoOuEnviado
-    opt WhatsApp habilitado
-        Notificacao-->>Professor: 3.3 mensagemWhatsAppEnviada
-    end
-    deactivate Notificacao
 ```
+

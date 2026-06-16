@@ -1,8 +1,8 @@
-# DiagramaDeSequencia - Integracoes e rastreabilidade - UC-41
+﻿# DiagramaDeSequencia - UC-41 - Manter rastreabilidade em extratos e notificacoes
 
 Artefato das Releases 2 e 3 do Valoriza Ae.
 
-Modelo baseado no gabarito: participantes fixos, bloco numerado, mensagens numeradas, retornos tracejados e fragmento `loop`.
+Modelo baseado no gabarito: participantes fixos, bloco numerado, mensagens numeradas, retornos tracejados e fragmentos UML quando necessario.
 
 [Voltar ao indice geral](DiagramaDeSequencia-release-2-3.md) | [Voltar ao grupo](DiagramaDeSequencia-05-integracoes-rastreabilidade.md)
 
@@ -37,3 +37,4 @@ sequenceDiagram
     deactivate Sistema
     Interface-->>Usuario: 1.13 extratoNotificacoesEventosExibidos
 ```
+
